@@ -9,25 +9,33 @@ output: html_documentoutput:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 Load up the required packages 
-```{r}
+```{r include=FALSE}
 library(dplyr)
+library("phyloseq")
+library(sp)
+library(automap)
+library(viridis)
+#library("reshape2")
+#library("vegan")
+library("ggplot2")
+#require(tibble)
+#library(reshape2)
 ```
-load up the csv file and set working diretory
+load up the fungal data csv file and set working directory
 ```{r}
-setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
-# load the fungal data
-## a transformed phyloseq object 
-vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
-
-# make a grid
-####################################################################################################################
+# setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+vst_physeq <- readRDS(file = "~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/vst_physeq_geog.rds") ## a phyloseq object containing a transformed otu table 
+```
+We're going to need a lattice to overlay our plotting variables.
+```{r}
 start_lat <- 0
 start_lng <- 0
 griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.5, l = 21),
                       lngcoords = seq(from = start_lng, by = 0.5, l = 81))
 
+# us this lattice for smoother maps
 #griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.05, l = 210),
-#                      lngcoords = seq(from = start_lng, by = 0.05, l = 810))
+#                    lngcoords = seq(from = start_lng, by = 0.05, l = 810))
 
 
 #plot(griddf)
@@ -36,16 +44,14 @@ griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.5, l = 21),
 coordinates(griddf) <- ~ latcoords + lngcoords
 # Change the grid points into a lattice 
 gridded(griddf) <- TRUE
-
-
-
-
-
-
-
-
+```
+Paremeter: this will set the minimum number of occurences for an OTU must be seen within a transect to be considered 'real'
+```{r}
 BBB=2 #min occur
-take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
+```
+This loop will generate maps and save them to a subdirectory named: Generated.Results
+```{r `echo = FALSE`}
+take.a.look <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
 take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
 
@@ -144,9 +150,11 @@ map <- ggplot(plot_me, aes(y = latcoords, x = lngcoords, fill = var1.pred)) +
   
 
 
-ggsave( plot = map, filename = paste("./Mapping.single.sp/Mantel.0.05/Maps/Generalist.combined/",new_dupes[AAA,1],"Transect",new_dupes[AAA,2],".jpg"), device = NULL, path = NULL,
+ggsave( plot = map, filename = paste("./Generated.Results/",new_dupes[AAA,1],"Transect",new_dupes[AAA,2],".jpg"), device = NULL, path = NULL,
         scale = 1, width = 8, height = 4.5, units = "in", 
-        dpi = 200, limitsize = TRUE)
+       dpi = 200, limitsize = TRUE)
+map
+
 }
 
 
