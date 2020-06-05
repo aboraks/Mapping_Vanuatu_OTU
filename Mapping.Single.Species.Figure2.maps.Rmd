@@ -14,7 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 "Hello World"
 "Can this be changed?"
 "Sure Why not "
+<<<<<<< HEAD
 "Because perhaph there is a conflict"
+=======
+"Something edited from the git side"
+>>>>>>> 04601b50256156506e24995de79f7aedbe7c0b3a
 ```
 
 ## Including Plots
