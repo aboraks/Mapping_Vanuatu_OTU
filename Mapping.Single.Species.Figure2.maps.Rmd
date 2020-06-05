@@ -2,7 +2,7 @@
 title: "Mapping.OTU.Figure.maps"
 output: html_documentoutput:
   github_document:
-    html_preview: false
+    html_preview: true
 ---
 
 ```{r setup, include=FALSE}
@@ -45,7 +45,8 @@ coordinates(griddf) <- ~ latcoords + lngcoords
 # Change the grid points into a lattice 
 gridded(griddf) <- TRUE
 ```
-Paremeter: this will set the minimum number of occurences for an OTU must be seen within a transect to be considered 'real'
+Parameter: 
+this will set the minimum number of occurrences for an OTU must be seen within a transect to be considered 'real'
 ```{r}
 BBB=2 #min occur
 ```
