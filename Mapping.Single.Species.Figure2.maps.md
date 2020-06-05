@@ -1,0 +1,185 @@
+Mapping.OTU.Figure.maps
+================
+andre
+2020-06-05
+
+Load up the required packages
+
+load up the fungal data csv file and set working directory
+
+``` r
+# setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+vst_physeq <- readRDS(file = "~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/vst_physeq_geog.rds") ## a phyloseq object containing a transformed otu table 
+```
+
+We’re going to need a lattice to overlay our plotting variables.
+
+``` r
+start_lat <- 0
+start_lng <- 0
+griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.5, l = 21),
+                      lngcoords = seq(from = start_lng, by = 0.5, l = 81))
+
+# us this lattice for smoother maps
+#griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.05, l = 210),
+#                    lngcoords = seq(from = start_lng, by = 0.05, l = 810))
+
+
+#plot(griddf)
+#head(griddf, n=15)
+#change grid to a spatial object
+coordinates(griddf) <- ~ latcoords + lngcoords
+# Change the grid points into a lattice 
+gridded(griddf) <- TRUE
+```
+
+Parameter: this will set the minimum number of occurrences for an OTU
+must be seen within a transect to be considered ‘real’
+
+``` r
+BBB=2 #min occur
+```
+
+This loop will generate maps and save them to a subdirectory named:
+Generated.Results
+
+``` r
+take.a.look <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
+take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
+take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+
+# Subset duplicates 
+dupes <- take.a.look %>%
+  group_by(OTU, Transect)%>% 
+  mutate(dupe = n()>1)
+
+dupes <- subset(dupes, dupe == TRUE)
+
+# this is another way to find duplicates - I'll use this one, because the end product will be easier to use for subsetting 
+new_dupes <- take.a.look[duplicated(take.a.look[c('OTU', 'Transect')]),] 
+
+# grab the OTU, Transect and medium 
+for (AAA in 1:nrow(new_dupes)) {
+
+################### Ground ####################
+# grab habitat-specialists for a single transect
+sub_vst_physeq.G <- subset_samples(vst_physeq, Transect == new_dupes[AAA,2] & Sample_Type == "Ground")
+# isolate an OTU identified above (in step #2)
+physeq.subset.G <- subset_taxa(sub_vst_physeq.G, rownames(tax_table(sub_vst_physeq.G)) %in% c(paste(new_dupes[AAA,1]))) # the last part of this code can be a list, or multiple c("otu1","otu2")
+tax_table(physeq.subset.G) # who is this OTU?
+
+count_tab.G <-  otu_table(physeq.subset.G) #this is an OTU table with abundences for the OTUs subsetted above 
+# cull the negative values in OTU table 
+count_tab.G[count_tab.G <= 0.0] <- 0.0
+tp.G <-sample_data(physeq.subset.G)
+all.equal(colnames(count_tab.G), rownames(tp.G)) # make sure meta-data and OTU match up
+#going to need the tp$Transect_Short as numeric 
+tp.G$Transect_Short <- as.numeric(levels(tp.G$Transect_Short))[tp.G$Transect_Short]
+tp.G$Transect_Long <- as.numeric(levels(tp.G$Transect_Long))[tp.G$Transect_Long]
+# Just grab the important stuff
+tp.Ggeo <- tp.G[,c("Transect_Short","Transect_Long")]
+tp.Ggeo <- cbind(tp.Ggeo,t(count_tab.G))
+colnames(tp.Ggeo)[3] <- "OTU_count"
+# Change grid and sample points into a Spatial Data Frame  SPDF
+coordinates(tp.Ggeo) <- ~ Transect_Short + Transect_Long
+kr.G <- autoKrige(tp.Ggeo$OTU_count~1, tp.Ggeo, griddf, model = "Exp", fix.values = c(0,NA,NA))
+#plot(kr.G)
+
+ggplot_data.G <- as.data.frame(kr.G$krige_output)
+ggplot_data.G$var1.pred<- cut_interval(ggplot_data.G$var1.pred, n=8,labels = FALSE) # chop the data into ordinal data - otherwise maps are hard to read 
+ggplot_data.G$Habitat <- "Soil"
+
+
+################### Understory  ####################
+# grab habitat-specialists for a single transect
+sub_vst_physeq.U <- subset_samples(vst_physeq, Transect == new_dupes[AAA,2] & Sample_Type == "Understory")
+# isolate an OTU identified above (in step #2)
+physeq.subset.U <- subset_taxa(sub_vst_physeq.U, rownames(tax_table(sub_vst_physeq.U)) %in% c(paste(new_dupes[AAA,1]))) # the last part of this code can be a list, or multiple c("otu1","otu2")
+#tax_table(physeq.subset.U) # who is this OTU?
+sp.id.U <- paste(tax_table(physeq.subset.U))
+sp.id.U <- paste(sp.id.U[1],sp.id.U[2],sp.id.U[3],sp.id.U[4],sp.id.U[5],sp.id.U[6],sp.id.U[7])
+
+
+count_tab.U <-  otu_table(physeq.subset.U) #this is an OTU table with abundences for the OTUs subsetted above 
+# cull the negative values in OTU table 
+count_tab.U[count_tab.U <= 0.0] <- 0.0
+tp.U <-sample_data(physeq.subset.U)
+all.equal(colnames(count_tab.U), rownames(tp.U)) # make sure meta-data and OTU match up
+#going to need the tp$Transect_Short as numeric 
+tp.U$Transect_Short <- as.numeric(levels(tp.U$Transect_Short))[tp.U$Transect_Short]
+tp.U$Transect_Long <- as.numeric(levels(tp.U$Transect_Long))[tp.U$Transect_Long]
+# Just grab the important stuff
+tp.Ugeo <- tp.U[,c("Transect_Short","Transect_Long")]
+tp.Ugeo <- cbind(tp.Ugeo,t(count_tab.U))
+colnames(tp.Ugeo)[3] <- "OTU_count"
+# Change grid and sample points into a Spatial Data Frame  SPDF
+coordinates(tp.Ugeo) <- ~ Transect_Short + Transect_Long
+kr.U <- autoKrige(tp.Ugeo$OTU_count~1, tp.Ugeo, griddf, model = "Exp", fix.values = c(0,NA,NA))
+#plot(kr.U)
+
+
+
+ggplot_data.U <- as.data.frame(kr.U$krige_output)
+ggplot_data.U$var1.pred<- cut_interval(ggplot_data.U$var1.pred, n=8,labels = FALSE) # chop the data into ordinal data - otherwise maps are hard to read 
+ggplot_data.U$Habitat <- "Phyllosphere"
+
+
+####################################################################
+# glue it the two datasets together
+plot_me <-rbind(ggplot_data.G,ggplot_data.U)
+
+
+map <- ggplot(plot_me, aes(y = latcoords, x = lngcoords, fill = var1.pred)) + 
+  geom_raster() + 
+  coord_fixed() + 
+  scale_fill_viridis(option = "magma") +
+  theme(legend.position = "none") +
+  labs(title = sp.id.U, subtitle = paste(new_dupes[AAA,1],"Transect",new_dupes[AAA,2])) +
+  xlab("meters") +
+  ylab("meters") +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  facet_wrap(~Habitat, ncol = 1,strip.position="right")
+  
+
+
+ggsave( plot = map, filename = paste("./Generated.Results/",new_dupes[AAA,1],"Transect",new_dupes[AAA,2],".jpg"), device = NULL, path = NULL,
+        scale = 1, width = 8, height = 4.5, units = "in", 
+       dpi = 200, limitsize = TRUE)
+map
+
+}
+```
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
+
+    ## [using ordinary kriging]
+    ## [using ordinary kriging]
