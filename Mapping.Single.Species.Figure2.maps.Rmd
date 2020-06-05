@@ -1,8 +1,8 @@
 ---
 title: "Mapping.OTU.Figure.maps"
-output: html_documentoutput:
-  github_document:
-    html_preview: true
+author: "andre"
+date: "`r format(Sys.Date())`"
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -51,7 +51,7 @@ this will set the minimum number of occurrences for an OTU must be seen within a
 BBB=2 #min occur
 ```
 This loop will generate maps and save them to a subdirectory named: Generated.Results
-```{r `echo = FALSE`}
+```{r `echo = FALSE`, warning=FALSE, , message=FALSE}
 take.a.look <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
 take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
@@ -67,7 +67,7 @@ dupes <- subset(dupes, dupe == TRUE)
 new_dupes <- take.a.look[duplicated(take.a.look[c('OTU', 'Transect')]),] 
 
 # grab the OTU, Transect and medium 
-for (AAA in 1:length(new_dupes)) {
+for (AAA in 1:nrow(new_dupes)) {
 
 ################### Ground ####################
 # grab habitat-specialists for a single transect
@@ -165,7 +165,3 @@ map
 ```
 
 
-
-
-## Including Plots
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
