@@ -1,8 +1,6 @@
 # Mapping_Vanuatu_OTU
 Here are the scripts used for the mapping OTUs manuscript
 
-
-And not I've added something via kraken 
-
-And here is more..
-
+Within this directory you can find:
+1. R code used to generate results 
+2. A directory containing some generated results
