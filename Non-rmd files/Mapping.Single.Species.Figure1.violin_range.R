@@ -1,4 +1,4 @@
-"Perhaps of I changed it"
+
 # Functions
 
 stat_box_data <- function(y, upper_limit = max(un.gr.gen$Range) * 1.15) {
