@@ -1,5 +1,5 @@
 ---
-title: "Mapping.OTU.Figure2.maps"
+title: "Mapping.OTU.Figure.maps"
 output: html_documentoutput:
   github_document:
     html_preview: false
