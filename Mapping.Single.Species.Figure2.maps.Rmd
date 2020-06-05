@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r cars}
 "Hello World"
+"Can this be changed?"
 ```
 
 ## Including Plots
