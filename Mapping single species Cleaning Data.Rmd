@@ -6,8 +6,12 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+Clear the environment
+```{r}
+rm(list=ls())
+```
 
-# Functions
+load some Functions
 ```{r, echo=FALSE}
 as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
@@ -78,18 +82,18 @@ make.heat.map <- function(gutable,ID){
 }
 
 ```
+# Workflow
+1 Identify OTUs that are found in ground/understory/both 
+subset entire dataset to only reflect sample-types that are matcing in location
+(note) this list is only for catiloging what the substrate the OTU is found in (not in development of variogram)
+2 pare dataset down to only samples that can be used for experimental variogram 
+    2.a - ie -found in a minimum number of samples/transect + a minimum number of transects
+3 Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
+     3.a - "Combining data from multiple years or areas to improve variogram estimation"
+4 Take some averages for variogram range and plot / tukeys anova 
 
-
-# 1 Identify OTUs that are found in ground/understory/both 
-    #1.a - subset entire dataset to only reflect sample-types that are matcing in location
-          #(note) this list is only for catiloging what the substrate the OTU is found in (not in development of variogram)
-# 2 pare dataset down to only samples that can be used for experimental variogram 
-    #2.a - ie - found in a minimum number of samples/transect + a minimum number of transects
-# 3 Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
-    # 3.a - "Combining data from multiple years or areas to improve variogram estimation"
-# 4 Take some averages for variogram range and plot / tukeys anova 
-
-# Load Packages
+Load Packages
+```{r}
 library("phyloseq")
 library("reshape2")
 library("vegan")
@@ -99,20 +103,20 @@ library("fossil")
 require(tibble)
 library(ape)
 require(tidyr)
-
-
-rm(list=ls())
-# First try and pick out some important species that would be worthwile 
+```
+Set working directory 
+```{r}
 setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+```
+First try and pick out some important species that would be worthwile 
 
-
-# load the fungal data
-##################################
-## a transformed phyloseq object 
+load the fungal data
+```{r}
+# a transformed phyloseq object 
 vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
-## a raredied OTU dataset 
+# a raredied OTU dataset 
 #vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
-
+```
 
 # 1 Identify OTUs that are found in ground/understory/both 
       #1.a - subset entire dataset to only reflect sample-types that are matcing in location
