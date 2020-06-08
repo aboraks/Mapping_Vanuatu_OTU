@@ -7,210 +7,79 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Mapping single species
+# Functions
+```{r, echo=FALSE}
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
-# Load Packages
-library("phyloseq")
-library("reshape2")
-library("vegan")
-library("dplyr")
-library("ggplot2")
-require(tibble)
-library(reshape2)
-
-rm(list=ls())
-# First try and pick out some important species that would be worthwile 
-setwd("/Users/fungi2/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
-
-
-# load the fungal data
-######################################################################################################################################################
-## a transformed phyloseq object 
-vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
-
-
-## a raredied OTU dataset 
-#vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
-
-Trnsx <- c(1,6,9,10,12)
-#HUGE <-2
-
-for (HUGE in 1:length(Trnsx)) {
+getID <- function(phyloseq_Subset){
+  X1 <- otu_table(phyloseq_Subset)
   
-
-# subset to a sample type
-Ssbst <- subset_samples(vst_physeq, Sample_Type == "Selaginella" & Transect== Trnsx[HUGE])
-#(Ssbst <- tax_glom(Ssbst, taxrank="Genus") ) #this is used to chop down the number of OTU's - so that only OTU's which were identified to Genus level are included in this loop
-Sotu_even <- getID(Ssbst)
-
-Gsbst <- subset_samples(vst_physeq, Sample_Type == "Ground" & Transect== Trnsx[HUGE])
-#(Gsbst <- tax_glom(Gsbst, taxrank="Genus") )#this is used to chop down the number of OTU's - so that only OTU's which were identified to Genus level are included in this loop
-Gotu_even <- getID(Gsbst)
-
-Usbst <- subset_samples(vst_physeq, Sample_Type == "Understory" & Transect== Trnsx[HUGE])
-#(Usbst <- tax_glom(Usbst, taxrank="Genus") )#this is used to chop down the number of OTU's - so that only OTU's which were identified to Genus level are included in this loop
-Uotu_even <- getID(Usbst)
-
-
-Gfungi <- Gotu_even[,(colnames(Gotu_even) %in% colnames(Uotu_even))]
-Ufungi <- Uotu_even[,(colnames(Uotu_even) %in% colnames(Gfungi))]
-Sfungi <- Sotu_even[,(colnames(Sotu_even) %in% colnames(Gfungi))]
-
-Ufungi <- Ufungi[,(colnames(Ufungi) %in% colnames(Sfungi))]
-Gfungi <- Gfungi[,(colnames(Gfungi) %in% colnames(Sfungi))]
-
-otu_names <- colnames(Gfungi)
-## Now we have a list of fungi (presence/absence) that are found in more than # (>=# (adjust in function @ bottom)) sample/transect for each sample type 
-
-# how many fungi are present in the list
-length(colnames(Gfungi))
-print(length(colnames(Gfungi)))
-print(colnames(Gfungi))
-
-
-#######################
-# Ground
-#######################
-# Subset the OTU dataset to only the names found in the list currated above 
-Gfungi <- t(otu_table(Gsbst))
-Gfungi <- Gfungi[,(colnames(Gfungi) %in% otu_names)]
-# make sure everything is in order
-Gfungi <- Gfungi[,order(colnames(Gfungi))]
-
-# some OTUs are now at a 0 value due to subsetting- remove any OTU less than 0
-Gfungi[Gfungi < 0.0] <- 0.0
-# any sample id that were removed in the OTU culling process should also be removed from the Sample ID list 
-Gsample <- sample_data(Gsbst)
-Gsample <- Gsample[(rownames(Gsample) %in% (rownames(Gfungi))),]
-
-#######################
-# Understory
-#######################
-# Subset the OTU dataset to only the names found in the list currated above 
-Ufungi <- t(otu_table(Usbst))
-Ufungi <- Ufungi[,(colnames(Ufungi) %in% otu_names)]
-# make sure everything is in order
-Ufungi <- Ufungi[,order(colnames(Ufungi))]
-
-# some OTUs are now at a 0 value due to subsetting- remove any OTU less than 0
-Ufungi[Ufungi < 0.0] <- 0.0
-# any sample id that were removed in the OTU culling process should also be removed from the Sample ID list 
-Usample <- sample_data(Usbst)
-Usample <- Usample[(rownames(Usample) %in% (rownames(Ufungi))),]
-
-#######################
-# Selaginella
-#######################
-# Subset the OTU dataset to only the names found in the list currated above 
-Sfungi <- t(otu_table(Ssbst))
-Sfungi <- Sfungi[,(colnames(Sfungi) %in% otu_names)]
-# make sure everything is in order
-Sfungi <- Sfungi[,order(colnames(Sfungi))]
-
-# some OTUs are now at a 0 value due to subsetting- remove any OTU less than 0
-Sfungi[Sfungi < 0.0] <- 0.0
-# any sample id that were removed in the OTU culling process should also be removed from the Sample ID list 
-Ssample <- sample_data(Ssbst)
-Ssample <- Ssample[(rownames(Ssample) %in% (rownames(Sfungi))),]
-
-
-
-#call tha taxomony table 
-fungID <- tax_table(Gsbst)
-
-
-#soil_colour <- data.frame("colour" = "#663300")
-#selaginella_colour <- data.frame("colour" = "#CC9900")
-#understory_colour <- data.frame("colour" = "#003300")
-#tree_colour <- data.frame("colour" = "#990000")
-
-# I think this is where you want to do a loop 
-# 
-
-#select(Gsample,Sample_Type,Transect_Short,Transect_Long)
-#Gfungi[,1]
-for (BIG in 1:length(colnames(Gfungi))) {
-# make a table of sample location and abundence of fungal isloate [,#]
+  X1[X1 < 0.0] <- 0.0
+  X1 <- X1[ rowSums(X1)!=0,]
+  X1 <- X1[,order(colnames(X1))]
+  X1 <- t(X1)
   
-Gtest <- cbind(select(Gsample,Sample_Type,Transect_Short,Transect_Long),Gfungi[,BIG])#,soil_colour)
+  
+  X1 <- decostand(X1, "pa")
+  
+  
+  X1 <- X1[, order(colSums(-X1))]
+  tail(colSums(X1))
+  length(colSums(X1))
+  
+  
+  #select only the OTUs that occur at more than one location
+  otu_even <- X1[,colSums(X1) >= 16]
+  otu_even
+}
 
-Gtest <- rbind(Gtest,cbind(select(Usample,Sample_Type,Transect_Short,Transect_Long),Ufungi[,BIG]))#,understory_colour))
-Gtest <- rbind(Gtest,cbind(select(Ssample,Sample_Type,Transect_Short,Transect_Long),Sfungi[,BIG]))#,selaginella_colour))
-
-
-
-Gtest$Transect_Short <- as.numeric.factor(Gtest$Transect_Short) # house keeping.. Factor->numeric
-Gtest$Transect_Long <- as.numeric.factor(Gtest$Transect_Long) # house keeping.. Factor->numeric
-
-taxID <- paste(fungID[colnames(Gfungi[,BIG]),2],fungID[colnames(Gfungi[,BIG]),3],"\n",fungID[colnames(Gfungi[,BIG]),4],fungID[colnames(Gfungi[,BIG]),5],"\n",fungID[colnames(Gfungi[,BIG]),6],fungID[colnames(Gfungi[,BIG]),7])
-
-
-ggplot(data = Gtest)+
-geom_point(aes(x=Gtest$Transect_Short, y=Gtest$Transect_Long, color = Sample_Type), data=Gtest, size=Gtest[,4], shape=0, show.legend = FALSE)+
-  labs(title = paste(colnames(Gfungi[,BIG])),
-       subtitle = paste(taxID))+
-  theme_minimal()+
-  theme(axis.title.x=element_blank(),axis.title.y = element_blank())
-
-
-ggsave(plot = last_plot(), 
-        filename = file.path("/Users/fungi2/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Tran.map.sp2", #where to save it
-                                                 paste("Transect",Trnsx[HUGE], colnames(Gfungi[,BIG]),".jpg")), #name
-        device = NULL,
-        scale = 1, width = 4, height = 7, units = "in", 
-        dpi = 150, limitsize = TRUE)
-
-
-
-  }
-
+#subset and remove Substrate identifyier from rowname 
+rmID <- function(phyloseq_Subset){
+  X1 <- otu_table(phyloseq_Subset)
+  
+  # some OTUs are now at a 0 value due to subsetting- remove any OTU less than 0
+  #  X1[X1 < 0.0] <- 0.0
+  #  X1 <- X1[ rowSums(X1)!=0,]
+  
+  
+  # order the two datasets 
+  X1 <- X1[,order(colnames(X1))]
+  X1 <- t(X1)
+  
+  # remove the character from rownames (so that datasets may be aligned)
+  rownames(X1) <- sub("*\\D", "", rownames(X1))
+  X1
 }
 
 
+########
+make.heat.map <- function(gutable,ID){
+  new <- t(gutable)
+  new <- new[,c(2,4)]
+  new <- as.data.frame(new)
+  xy <- paste(new$Ground.PA,new$Under.PA, sep = ",")
+  new <- as.data.frame(table(xy))
+  new <- separate(new,col = xy, into = c("x","y"),sep = ",")
+  new$Freq <- as.numeric(new$Freq)
+  new$x <- as.numeric(new$x)
+  new$y <- as.numeric(new$y)
+
+  ggplot(new, aes(x, y, fill= log10(Freq + 1))) + 
+    geom_tile() +
+    coord_equal() +
+    theme_classic()+
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_distiller(palette = "RdPu") +
+    labs(title = paste("Transect",ID)) +
+    xlab("# of times OTU is found in Ground") +
+    ylab("# of times OTU is found in Understory")+
+    theme(legend.position = "none") # I couldnt get this scale to reflect true frequency, so I dumped the ledgend 
+}
+
+```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####################################################################################################################################################################
-# something different 
-####################################################################################################################################################################
 # 1 Identify OTUs that are found in ground/understory/both 
     #1.a - subset entire dataset to only reflect sample-types that are matcing in location
           #(note) this list is only for catiloging what the substrate the OTU is found in (not in development of variogram)
@@ -1019,76 +888,23 @@ write.table(sig.results.grnd, file = paste("./Mapping.single.sp/Mantel.0.05/sig.
 
 
 
-####################################################################################################################################################################
-# Functions
-####################################################################################################################################################################
-as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
-
-getID <- function(phyloseq_Subset){
-  X1 <- otu_table(phyloseq_Subset)
-  
-  X1[X1 < 0.0] <- 0.0
-  X1 <- X1[ rowSums(X1)!=0,]
-  X1 <- X1[,order(colnames(X1))]
-  X1 <- t(X1)
-  
-  
-  X1 <- decostand(X1, "pa")
-  
-  
-  X1 <- X1[, order(colSums(-X1))]
-  tail(colSums(X1))
-  length(colSums(X1))
-  
-  
-  #select only the OTUs that occur at more than one location
-  otu_even <- X1[,colSums(X1) >= 16]
-  otu_even
-}
-
-#subset and remove Substrate identifyier from rowname 
-rmID <- function(phyloseq_Subset){
-  X1 <- otu_table(phyloseq_Subset)
-  
-  # some OTUs are now at a 0 value due to subsetting- remove any OTU less than 0
-  #  X1[X1 < 0.0] <- 0.0
-  #  X1 <- X1[ rowSums(X1)!=0,]
-  
-  
-  # order the two datasets 
-  X1 <- X1[,order(colnames(X1))]
-  X1 <- t(X1)
-  
-  # remove the character from rownames (so that datasets may be aligned)
-  rownames(X1) <- sub("*\\D", "", rownames(X1))
-  X1
-}
 
 
-########
-make.heat.map <- function(gutable,ID){
-  new <- t(gutable)
-  new <- new[,c(2,4)]
-  new <- as.data.frame(new)
-  xy <- paste(new$Ground.PA,new$Under.PA, sep = ",")
-  new <- as.data.frame(table(xy))
-  new <- separate(new,col = xy, into = c("x","y"),sep = ",")
-  new$Freq <- as.numeric(new$Freq)
-  new$x <- as.numeric(new$x)
-  new$y <- as.numeric(new$y)
 
-  ggplot(new, aes(x, y, fill= log10(Freq + 1))) + 
-    geom_tile() +
-    coord_equal() +
-    theme_classic()+
-    scale_x_continuous(expand = c(0, 0)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    scale_fill_distiller(palette = "RdPu") +
-    labs(title = paste("Transect",ID)) +
-    xlab("# of times OTU is found in Ground") +
-    ylab("# of times OTU is found in Understory")+
-    theme(legend.position = "none") # I couldnt get this scale to reflect true frequency, so I dumped the ledgend 
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
