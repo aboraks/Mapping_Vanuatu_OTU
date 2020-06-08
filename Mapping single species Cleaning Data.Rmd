@@ -857,11 +857,41 @@ write.table(sig.results.grnd, file = paste("./Generated.Results/sig.sa.gen.grnd.
 
 ```  
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+##Warning##
+##############################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
+
+
+Some of the code below may be redundant depending on what the violin-pokt.r says
+
+
+
+
+
   
 ##This next section comes from the code titled:
 /Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.Single.Species.KriegLoop
 
-This body of code will generate variograms for:
+This body of code will generate variogram models. These can later be used for:
 Range models
 Kriging 
 
@@ -1069,6 +1099,9 @@ test
 # OTU min occurrence / mean ranges for Ground and Understory - pvalue for difference - 
 read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/summary.otu.range.habitat.csv"), header = TRUE)
 
+```
+
+```{r}
 # This is the OTU and range for QQQ 
 take.a.look <-read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",10,"otu.range.habitat.csv"), header = TRUE)
 
@@ -1089,10 +1122,11 @@ summary(Range ~ Habitat, data = take.a.look)
 summary(take.a.look$Habitat)
 
 
+```
 
-
+```{r}
 BBB=2 #min occur
-take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.csv"), header = TRUE)
+take.a.look <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.csv"), header = TRUE)
 take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
 take.a.look <- take.a.look[take.a.look$Range<200,] # there are three OTU with large +247m ranges 
@@ -1109,7 +1143,7 @@ take.a.look %>%
     max.range = max(Range)
   )
 
-  
+``` 
 ###########################################################################
 ############################### GENERALISTS ###############################
 ###########################################################################
@@ -1316,9 +1350,9 @@ for (BBB in 2:30) {
 
 
 
-
+```{r}
 BBB=2 #min occur
-take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
+take.a.look <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
 take.a.look <- take.a.look[take.a.look$Range>.5,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
 #take.a.look <- take.a.look[take.a.look$Range<30,]
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
@@ -1342,7 +1376,7 @@ take.a.look %>%
 
 wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value
 
-
+```
 
 
 
