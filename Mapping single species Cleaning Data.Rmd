@@ -103,15 +103,12 @@ library("fossil")
 require(tibble)
 library(ape)
 require(tidyr)
-```
-Set working directory 
-```{r}
-setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
-```
-First try and pick out some important species that would be worthwile 
 
+```
 load the fungal data
-```{r}
+```{r warning=False}
+# Set working directory 
+setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
 # a transformed phyloseq object 
 vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
 # a raredied OTU dataset 
@@ -120,38 +117,35 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
 
 # 1 Identify OTUs that are found in ground/understory/both 
       #1.a - subset entire dataset to only reflect sample-types that are matcing in location
-
-
-for (QQQ in 2:2) { # use this loop start to generate a series of tables (see line ~ 632: write.table(sig.results.undr, file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-
+```{r}
+QQQ=2
+#for (QQQ in 2:2) { # use this loop start to generate a series of tables QQQ = 2:36 (see line ~ 632: write.table(sig.results.undr, file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
 
 ground <- data.frame(matrix(ncol=7,nrow=0))
 understory <- data.frame(matrix(ncol=7,nrow=0))
-# QQQ=5
-#for (QQQ in 12:12) {  # this is the minimum number of times an OTU needs to be found in each transect - for a table use:             for (QQQ in 1:36) {
 
-
+#QQQ is the minimum number of times an OTU needs to be found in each transect - for a table use:    for (QQQ in 1:36) {
 
 ground.results <- data.frame(matrix(ncol=6,nrow=0))
 under.results <- data.frame(matrix(ncol=6,nrow=0))
 neg.ref.ground <- data.frame(matrix(ncol=6,nrow=0))
 neg.ref.under <- data.frame(matrix(ncol=6,nrow=0))
 
-trnsx <- c(1,4,6,9,10,12)
-#TTT <- 2
+trnsx <- c(1,4,6,9,10,12) #this is a list of the transect IDs 
 
+#here is a loop to iterate over all transects 
 for (TTT in 1:length(trnsx)) {
 # subset to a sample type
-sbst <- subset_samples(vst_physeq, Sample_Type == "Understory")# & Transect==trnsx[TTT])
+sbst <- subset_samples(vst_physeq, Sample_Type == "Understory" & Transect==trnsx[TTT])
 Ufungi <- rmID(sbst)
-sbst <- subset_samples(vst_physeq, Sample_Type == "Ground")# & Transect==trnsx[TTT])
+sbst <- subset_samples(vst_physeq, Sample_Type == "Ground" & Transect==trnsx[TTT])
 Gfungi <- rmID(sbst)
 
 # ensure only identical sample locations are represented 
 Gfungi <- Gfungi[(rownames(Gfungi) %in% rownames(Ufungi)),]
 Ufungi <- Ufungi[(rownames(Ufungi) %in% rownames(Gfungi)),]
 
-
+# check to make sure only identical sample locations are represented 
 # Remove the all() to see the not identical one(s)
 all(sapply(list(rownames(Ufungi)), FUN = identical, rownames(Gfungi))) # should be TRUE #
 
@@ -163,7 +157,6 @@ Ufungi[Ufungi < 0.0] <- 0.0
 
 
 # its time to categorize OTUs as either Ground or Understory or Both 
-
 # First make a talbe that looks like this
 
 #                 OTU1 OTU2 OTU3
@@ -184,6 +177,8 @@ rownames(gutable) <- c("Ground.abund","Ground.PA","Under.abund","Under.PA")
 #un <- gutable[3:4,]
 #un <- un[,colSums(un)!=0]
 #ncol(un)
+
+
 # Take a look at how OTUs are distributed across two different habitat types 
 # Each dot is the number of times an OTU is found in a transect. 
 # OTUs found along the x-axis are fungi only found in soil - whereas OTUs found along the y-axis are fungi only found in Understory
@@ -197,7 +192,7 @@ rownames(gutable) <- c("Ground.abund","Ground.PA","Under.abund","Under.PA")
 
 # this is the part where you will choose OTUs that are either Ground or Understory Exclusive OTUs
 # you may adjust the sensitivity of this test by adjusting the cutoff values in the filter step 
-# for exampl: "Select only fungi that are found in the Understory a minimum of 5 times, and are also found in soil less than 2 occurences)
+# for example: "Select only fungi that are found in the Understory a minimum of QQQ times, and are also found in soil less than 2 occurences)
 
 temp <- as.data.frame(t(gutable)) %>% rownames_to_column('OTU') # pull out and save OTU names - because dplyr will discard them
 temp$Trns <- trnsx[TTT]
@@ -218,6 +213,7 @@ print(paste(length(rownames(underfungi)),"OTUs found ONLY in Understory in Trans
 # Remove later
 #print(paste("Ground",trnsx[TTT],ncol(gr),length(rownames(groundfungi))))
 #print(paste("Understory",trnsx[TTT],ncol(un),length(rownames(underfungi))))
+
 
 # now you have two dataframes of OTUs that are found on only one substrate or the other 
 
@@ -243,12 +239,21 @@ neg.ref.under <- rbind(neg.ref.under,neg.ref.un)
 
 
 }
-
-
-write.table(ground.results, file = paste("./Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-write.table(under.results, file = paste("./Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-
-
+```
+you now have a list of fungi, their abundance, the number of times they occur within a transect, and the transect ID for:
+Ground 
+Understory 
+and also you have a negative reference list of all OTUs found in a habitat in all transects combined
+So save a list of Ground and Understory 'specialists' that occur a minimum of QQQ times in a transect 
+```{r}
+write.table(ground.results, file = paste("./Generated.Results/special.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+write.table(under.results, file = paste("./Generated.Results/special.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+```
+We have a list of OTUs that were discovered exclusivly in a single habitat of one transect.
+But what happend if they are discovered in a different habitat of a different transect? 
+In other words, if an OTU is identified as a Soil specialist in Transect 6, but it appears in the understory of Transect 1, is it still a Soil Specialist? 
+I think not. So we will use our negative reference list to remove these Type 2 error OTUs 
+```{r}
 groundfungi <- ground.results %>%
   group_by(OTU) %>%
   summarise(n_distinct(Trns))
@@ -268,9 +273,17 @@ neg.ref.under <- neg.ref.under %>%
 
 groundfungi <- groundfungi %>% anti_join(neg.ref.ground, by = "OTU") # keep only Ground OTUs not found in Understory of other transects 
 underfungi <- underfungi %>% anti_join(neg.ref.under, by = "OTU") # keep only Understory OTUs not found in Understory of other transects 
+```
+Now we have a list of OTU specialists: 
+#Soil: 
+groundfungi
+#Understory(Phyllosphere):
+underfungi
 
 
-
+No out of currosity we are going to see how many of these OTUs occur in more than one transect
+In otherwords are there OTUs that are identified as a specialist in more than one transect? and if so, how many of them are there?
+```{r}
 # how many ground fungi are found in high abundance in more than one transect 
 #length(rownames(filter(groundfungi,`n_distinct(Trns)` == 1)))
 
@@ -310,42 +323,36 @@ understory
 # Then you'll have to identify the OTU and the transect(s) it can be found in
 ##################################################
 
-# to get things kicked off - I'll choose the minimum number of observations/transect to be 17 
-# with QQQ=17 we should have ONE otu that can be found in 3 transects for each Understory and Ground (see slack (or run loop)) 
-
+# Ground
 # Make a list of OTU names that are found in a minimum number of transects (adjust on line below - "`n_distinct(Trns)` == #")
 otus <- as.data.frame(filter(groundfungi,`n_distinct(Trns)` >= 1))$OTU
-# pare down the origional list of fungi meeting the minimum occurence number (17)
+# pare down the origional list of fungi meeting the minimum occurence number
 tes <- filter(ground.results,OTU %in% otus)
 # heres a table of OTUs that are meeting the above criteria - and where to find them:
 grnd <- dcast(tes,OTU ~ Trns, value.var = "Trns")
 
-
+# Understory
 # Make a list of OTU names that are found in a minimum number of transects (adjust on line below)
 otus <- as.data.frame(filter(underfungi,`n_distinct(Trns)` >= 1))$OTU
-# pare down the origional list of fungi meeting the minimum occurence number (17)
+# pare down the origional list of fungi meeting the minimum occurence number 
 tes <- filter(under.results,OTU %in% otus)
 # heres a table of OTUs that are meeting the above criteria - and where to find them:
 undr <- dcast(tes,OTU ~ Trns, value.var = "Trns")
+```
 
 
-
-# now you have a list of OTU IDs and where to find them 
+# now you have a list of specialist OTU IDs and which transect(s) they can be found in
+```{r}
 undr
 grnd
 
-nrow(grnd)
-nrow(undr)
+print(paste("there are",nrow(grnd),"Soil specialists identified in Vanuatu"))  
+print(paste("there are",nrow(undr),"Phyllosphere specialists identified in Vanuatu"))
+```
 
-# 3 Check for spatial autocorrelation and Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
-    # 3.a - "Combining data from multiple years or areas to improve variogram estimation"# pare sample_data table down by only the remaining sample ids in the OTU table 
-            # isolate an OTU identified above
-            # grab unique transect ids from sample-data table 
-            # start loop investigating each transect separatly
-            # for transect i make variogram 
-            # inspect 
-            # figure out how to combine variograms 
-# GROUND #
+# 3 Check for spatial autocorrelation for each OTU+transect
+GROUND
+```{r}
 results.grnd <- data.frame(matrix(ncol=7,nrow=0))
 for (RRR in 1:nrow(grnd)) {
 
@@ -367,7 +374,7 @@ count_tab[count_tab <= 0.0] <- 0.0
 ## Make sure datasets are matching 
 all.equal(colnames(count_tab), rownames(sample_data(physeq.subset)))
 ## geo distance 
-geo <- cbind(sample_data(physeq.subset)$TrnLon2, sample_data(physeq.subset)$TrnLat2) #make a table of lat long coordinates # like this: 
+geo <- cbind(sample_data(physeq.subset)$TrnLon2, sample_data(physeq.subset)$TrnLat2) #make a table of lat long coordinates 
 geodist <- earth.dist(geo) #create a distance matrix (distances are in km)
 #dist.otu <- vegdist(decostand(t(count_tab), method = "rank"), distance = "euclidean")
 dist.otu <- dist(t(count_tab),method = "euclidean", diag = FALSE, upper = FALSE) 
@@ -423,13 +430,27 @@ nrow(subset(results.grnd, MantelP<0.05))/nrow(results.grnd) # %
 #write.table(s.a, file = "./Mapping.single.sp/spatialAuto.txt", sep = ",", quote = FALSE, row.names = F)
 #write.table(results, file = "./Mapping.single.sp/results.txt", sep = ",", quote = FALSE, row.names = F)
 
-####################################
-# make a figure describing the above loop results
 # for a results summary - check out "./Mapping.single.sp/occurrences per transect and spatial autocorrelation.xlsx"
+```
+We now have a table of Soil specialist OTUs 
+and their likelyhood of being spatially autocorrelated
+```{r}
+print(paste(nrow(subset(results.grnd, MantelP<0.05)),"Ground OTUs are spatially autocorrelated with a Mantel threshold of p<0.05"))
+print(paste("or",nrow(subset(results.grnd, MantelP<0.05))/nrow(results.grnd),"% are spatially autocorrelated"))
+```
 
-dat = read.csv("./Mapping.single.sp/sp.auto.csv", header = TRUE)
-adonis(percent.sp.auto ~ Habitat+num.trnsct+occur.per.trnsct, dat,  method ="euclidean", permutations = 999)
-adonis(percent.sp.auto ~ num.trnsct+occur.per.trnsct, dat, strata=dat$Habitat,  method ="euclidean", permutations = 999)
+Here is an adonis to test whether:
+-the number of occurances per transect
+and
+-the number of transects an OTU appears in
+affects
+-the proportion of spatially autocorrelated OTUs
+
+```{r}
+
+#dat = read.csv("./Mapping.single.sp/sp.auto.csv", header = TRUE)
+#adonis(percent.sp.auto ~ Habitat+num.trnsct+occur.per.trnsct, dat,  method ="euclidean", permutations = 999)
+#adonis(percent.sp.auto ~ num.trnsct+occur.per.trnsct, dat, strata=dat$Habitat,  method ="euclidean", permutations = 999)
 
 # I couldn't figure out how to make the plot - moving on 
 # if you want to crack at this again look at this excel file: "./Mapping.single.sp/occurrences per transect and spatial autocorrelation.xlsx"
@@ -446,10 +467,11 @@ adonis(percent.sp.auto ~ num.trnsct+occur.per.trnsct, dat, strata=dat$Habitat,  
 #               1     2     3     4     5
 #               occur in # transect 
 #
-# make a variogram
+```
+Check for spatial autocorrelation in the Understory
 
-
-# UNDERSTORY #
+UNDERSTORY
+```{r}
 results.undr <- data.frame(matrix(ncol=7,nrow=0))
 for (RRR in 1:nrow(undr)) {
   id.n.trns <- undr[RRR,complete.cases(t(undr[RRR,]))]
@@ -508,88 +530,38 @@ nrow(subset(results.undr, MantelP<0.05)) # how many meet the threshold of <0.05 
 nrow(subset(results.undr, MantelP<0.05))/nrow(results.undr) # %
 #write.table(s.a, file = "./Mapping.single.sp/spatialAuto.txt", sep = ",", quote = FALSE, row.names = F)
 #write.table(results, file = "./Mapping.single.sp/results.txt", sep = ",", quote = FALSE, row.names = F)
+```
+We now have a table of Phyllosphere specialist OTUs 
+and their likelyhood of being spatially autocorrelated
+```{r}
+print(paste(nrow(subset(results.undr, MantelP<0.05)),"Phyllosphere OTUs are spatially autocorrelated with a Mantel threshold of p<0.05"))
+print(paste("or",nrow(subset(results.undr, MantelP<0.05))/nrow(results.undr),"% are spatially autocorrelated"))
+```
 
-
-# compare mantel and moran 
+compare mantel and moran 
+```{r}
 nrow(subset(results.undr, MantelP<0.05))
 nrow(subset(results.undr, MoranP<0.05))
+```
+And save these results to a table
+```{r}
+write.table(sig.results.undr, file = paste("./Generated.Results/sig.sa.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+write.table(sig.results.grnd, file = paste("./Generated.Results/sig.sa.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+```
 
 
-
-write.table(sig.results.undr, file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-write.table(sig.results.grnd, file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-
-
-
-} # this is just the terminus of a loop that is to make running the above block of code easy 
-
-
-
-
-
-
-# 3 Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
-
-# as determined by the RRR loop - (results in excel file: "./Mapping.single.sp/occurrences per transect and spatial autocorrelation.xlsx") The 
-# number of transects an OTU occurs in does not really improve the predictibility of spatial autocorrelation 
-# for this reason it will be okay to choose OTUs that occur in only a single transect (if the otu occurs in additional transects then bonus)
-# The minimum number of occurences per transect will be determined by the variogram 
-
-# For development purposes - lets start with a high number of occurences/transect so that we can get some nice clean variograms- 
-# later, after everything is running smoothly, we can reduce the number of occurences/transect and watch the variograms deteriorate 
-
-# Minimum number of occurences/transect = 31 = QQQ
-# This results in 3 ground and 3 understory OTUs 
-# you can run the above code - or save yourself some time and and just read it from a file 
-
-############################################################################
-
-
-
-
-
-
-# autokrig found here: http://rstudio-pubs-static.s3.amazonaws.com/80464_9156596afb2e4dcda53e3650a68df82a.html
-# Set up the data by running lines 1-36
-
-# 4 things are needed: 
-# 1.The model formula.
-# 2.An SPDF of the spatial domain that has measurements.
-# 3.An SPDF of the spatial domain to krige over.
-# 4.A variogram model fitted to the data.
-
-# start by making a grid to krige over 
-# Change grid and sample points into a Spatial Data Frame  SPDF
-# Compute variogram 
-# fit model to Variogram 
-# Krig 
-
-# See Mapping.Single.Species.KriegLoop.r
-
-
-
-
-
-
-################################################################################
 # Identify generalists 
-################################################################################
 
-
-
-
-# First try and pick out some important species that would be worthwile 
+load the fungal data
+```{r}
 setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
-
-
-# load the fungal data
-##################################
 ## a transformed phyloseq object 
 vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
 ## a raredied OTU dataset 
 #vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
+```
 
-
+```{r}
 # 1 Identify OTUs that are found in ground/understory/both 
 #1.a - subset entire dataset to only reflect sample-types that are matcing in location
 
@@ -599,7 +571,7 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   
   generalists <- data.frame(matrix(ncol=7,nrow=0))
   # QQQ=2
-  for (QQQ in 2:25) {  # this is the minimum number of times an OTU needs to be found in each transect - for a table use:             for (QQQ in 1:36) {
+  for (QQQ in 2:2) {  # this is the minimum number of times an OTU needs to be found in each transect - for a table use:             for (QQQ in 2:25) {
   
   
   
@@ -668,7 +640,7 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
     
   gen.results
   # now you have a dataframes of OTUs that are found in both substrates at a minimum frequency of QQQ
-  write.table(gen.results, file = paste("./Mapping.single.sp/Mantel.0.05/Patch.occupancy/gen.grnd.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+  write.table(gen.results, file = paste("./Generated.Results/gen.grnd.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
   
 
   
@@ -718,7 +690,7 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   nrow(undr)
 
   
-  # 3 Check for spatial autocorrelation and Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
+  # 3 Check for spatial autocorrelation and Make variograms for each OTU+transect
 
   results.grnd <- data.frame(matrix(ncol=7,nrow=0))
   for (RRR in 1:nrow(grnd)) {
@@ -876,16 +848,16 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   
   
   
-write.table(sig.results.undr, file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.gen.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-write.table(sig.results.grnd, file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.gen.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+write.table(sig.results.undr, file = paste("./Generated.Results/sig.sa.gen.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
+write.table(sig.results.grnd, file = paste("./Generated.Results/sig.sa.gen.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
   
   
   
   } # this is just the terminus of a loop that is to make running the above block of code easy 
   
+```  
   
   
-  
 
 
 
@@ -898,6 +870,36 @@ write.table(sig.results.grnd, file = paste("./Mapping.single.sp/Mantel.0.05/sig.
 
 
 
+
+
+
+# 3 Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
+
+# as determined by the RRR loop - (results in excel file: "./Mapping.single.sp/occurrences per transect and spatial autocorrelation.xlsx") The 
+# number of transects an OTU occurs in does not really improve the predictibility of spatial autocorrelation 
+# for this reason it will be okay to choose OTUs that occur in only a single transect (if the otu occurs in additional transects then bonus)
+
+
+
+
+
+
+# autokrig found here: http://rstudio-pubs-static.s3.amazonaws.com/80464_9156596afb2e4dcda53e3650a68df82a.html
+# Set up the data by running lines 1-36
+
+# 4 things are needed: 
+# 1.The model formula.
+# 2.An SPDF of the spatial domain that has measurements.
+# 3.An SPDF of the spatial domain to krige over.
+# 4.A variogram model fitted to the data.
+
+# start by making a grid to krige over 
+# Change grid and sample points into a Spatial Data Frame  SPDF
+# Compute variogram 
+# fit model to Variogram 
+# Krig 
+
+# See Mapping.Single.Species.KriegLoop.r
 
 
 
