@@ -560,7 +560,8 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
 ## a raredied OTU dataset 
 #vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
 ```
-
+We'll start by identifying those OTUs that are found in both habitats:
+at QQQ occurances/transect 
 ```{r}
 # 1 Identify OTUs that are found in ground/understory/both 
 #1.a - subset entire dataset to only reflect sample-types that are matcing in location
@@ -570,8 +571,8 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   
   
   generalists <- data.frame(matrix(ncol=7,nrow=0))
-  # QQQ=2
-  for (QQQ in 2:2) {  # this is the minimum number of times an OTU needs to be found in each transect - for a table use:             for (QQQ in 2:25) {
+QQQ=2
+#  for (QQQ in 2:2) {  # this is the minimum number of times an OTU needs to be found in each transect - for a table use:             for (QQQ in 2:25) {
   
   
   
@@ -639,17 +640,23 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   }   
     
   gen.results
-  # now you have a dataframes of OTUs that are found in both substrates at a minimum frequency of QQQ
+```
+now you have a dataframes of OTUs that are found in both substrates at a minimum frequency of QQQ
+Write a table
+```{r}
   write.table(gen.results, file = paste("./Generated.Results/gen.grnd.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-  
+```
 
-  
+
+Now let's take a look at:
+Which transects these OTUs occur in 
+and 
+If an OTU is identified as a generalist at QQQ occurences in both habitats of a transect 
+Is it also identified as a generalist at QQQ occurences in both habitats of OTHER transects?
+```{r}
   genfungi <- gen.results %>%
     group_by(OTU) %>%
     summarise(n_distinct(Trns))
-  
- 
-  
   
   # how many ground fungi are found in high abundance in more than one transect 
   #length(rownames(filter(genfungi,`n_distinct(Trns)` > 1)))
@@ -664,34 +671,30 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
  
   #names(generalists) <- c("Obs.per.tran","1tran","2tran","3tran","4tran","5tran")
 
-#  }
+
   
   #names(generalists) <- c("Obs.per.tran","1tran","2tran","3tran","4tran","5tran","6tran")
   generalists
-  
- 
-  
-  
+
   
   ##########################################################
   # Min number of transects 
   
    # Make a list of OTU names that are found in a minimum number of transects (adjust on line below - "`n_distinct(Trns)` == #")
   otus <- as.data.frame(filter(genfungi,`n_distinct(Trns)` >= 1))$OTU
-  # pare down the origional list of fungi meeting the minimum occurence number (17)
+  # pare down the origional list of fungi meeting the minimum occurence number
   tes <- filter(gen.results,OTU %in% otus)
   # heres a table of OTUs that are meeting the above criteria - and where to find them:
   gen <- dcast(tes,OTU ~ Trns, value.var = "Trns")
 
+  nrow(gen)
+```
+  
+#Soil Generalists
+Check for spatial autocorrelation for each OTU+transect
+```{r}
  grnd <- gen  
- undr <- gen
-  
-  
-  nrow(undr)
-
-  
-  # 3 Check for spatial autocorrelation and Make variograms for each OTU+transect
-
+ 
   results.grnd <- data.frame(matrix(ncol=7,nrow=0))
   for (RRR in 1:nrow(grnd)) {
     
@@ -766,11 +769,11 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   nrow(results.grnd) # = number of OTU*transects 
   nrow(subset(results.grnd, MoranP<0.05)) # how many meet the threshold of <0.05 morans i
   nrow(subset(results.grnd, MoranP<0.05))/nrow(results.grnd) # %
-
-  
-#############################
-  # Understory
-#############################  
+```
+#Understory Generalists
+Check for spatial autocorrelation for each OTU+transect
+```{r}
+ undr <- gen
   results.undr <- data.frame(matrix(ncol=7,nrow=0))
   for (RRR in 1:nrow(undr)) {
     
@@ -845,20 +848,499 @@ vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
   nrow(results.undr) # = number of OTU*transects 
   nrow(subset(results.undr, MantelP<0.05)) # how many meet the threshold of <0.05 morans i
   nrow(subset(results.undr, MantelP<0.05))/nrow(results.undr) # %
+
+```  
   
-  
-  
+```{r}  
 write.table(sig.results.undr, file = paste("./Generated.Results/sig.sa.gen.undr.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
 write.table(sig.results.grnd, file = paste("./Generated.Results/sig.sa.gen.grnd.",QQQ,".occur.results.csv"), sep = ",", quote = FALSE, row.names = F)
-  
-  
-  
-  } # this is just the terminus of a loop that is to make running the above block of code easy 
-  
+
 ```  
   
   
+##This next section comes from the code titled:
+/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.Single.Species.KriegLoop
 
+This body of code will generate variograms for:
+Range models
+Kriging 
+
+Its also going to generate a zillion maps.
+
+Be sure to sort through these packages at a later date
+```{r}
+library(sp)
+library(gstat)
+library(reshape2)
+library(viridis)
+library(automap)
+suppressPackageStartupMessages({
+  library(dplyr) # for "glimpse"
+  library(ggplot2)
+  library(scales) # for "comma"
+  library(magrittr)
+})
+```
+
+```{r}
+test <- data.frame(matrix(ncol=4,nrow=0))
+
+for (AAA in 2:24) {
+ 
+#AAA=12
+#############
+# Patch # - The loop was breaking because it would run too fast for dev (devices) and there would be a gazillion devices opened 
+  # so here we pause the loop for 15 seconds (let everything finish writing)
+  # and exit all devices (graphic.of()) 
+Sys.sleep(10)
+  graphics.off()
+  
+#########################
+# Mantel/ Moran
+grnd.otu = read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.grnd.",AAA,".occur.results.csv"), header = TRUE)
+undr.otu = read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.undr.",AAA,".occur.results.csv"), header = TRUE)
+
+#  Neither 
+#grnd.otu = read.csv(file = paste("./Mapping.single.sp/Non.sig/nonsig.sa.grnd.",AAA,".occur.results.csv"), header = TRUE)
+#undr.otu = read.csv(file = paste("./Mapping.single.sp/Non.sig/nonsig.sa.undr.",AAA,".occur.results.csv"), header = TRUE)
+  
+  # make a grid
+######################################################################################################################################################
+
+  start_lat <- 0
+  start_lng <- 0
+  
+  griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.5, l = 21),
+                        lngcoords = seq(from = start_lng, by = 0.5, l = 81))
+  head(griddf, n=15)
+  #change grid to a spatial object
+  coordinates(griddf) <- ~ latcoords + lngcoords
+  # Change the grid points into a lattice 
+  gridded(griddf) <- TRUE
+  #plot(griddf)
+  
+  
+  
+  un.ranges = NULL
+  un.otu <- NULL
+  #un.rmse <- NULL
+  un.max <- NULL
+  un.transect <- NULL
+  un.tax <- data.frame(matrix(ncol=7,nrow=0))
+  #VVV=12
+  for (VVV in 1: nrow(undr.otu)) {
+    tryCatch({ # this is a hack to skip errors when the kriging fails and breaks the loop 
+    sub_vst_physeq <- subset_samples(vst_physeq, Transect == undr.otu$Transect[VVV] & Sample_Type == "Understory") #  subset the phyloseq object
+    physeq.subset <- subset_taxa(sub_vst_physeq, rownames(tax_table(sub_vst_physeq)) %in% undr.otu$OTU[VVV]) # only keep the listed OTU
+    tax_table(physeq.subset) # what kind of fungus is this OTU?
+    count_tab <-  otu_table(physeq.subset) #this is an OTU table with abundences for the OTUs subsetted above 
+    count_tab[count_tab <= 0.0] <- 0.0
+    tp <-sample_data(physeq.subset)
+    all.equal(colnames(count_tab), rownames(tp)) # make sure meta-data and OTU match up
+    #going to need the tp$Transect_Short as numeric 
+    tp$Transect_Short <- as.numeric(levels(tp$Transect_Short))[tp$Transect_Short]
+    tp$Transect_Long <- as.numeric(levels(tp$Transect_Long))[tp$Transect_Long]
+    # Just grab the important stuff
+    tpgeo <- tp[,c("Transect_Short","Transect_Long")]
+    tpgeo <- cbind(tpgeo,t(count_tab))
+    colnames(tpgeo)[3] <- "OTU_count"
+    ##############################################################
+    # Change grid and sample points into a Spatial Data Frame  SPDF
+    coordinates(tpgeo) <- ~ Transect_Short + Transect_Long
+    ################################################################
+    # Compute and fit variogram 
+    #bbox(tpgeo)
+    lzn.vgm <- autofitVariogram(tpgeo$OTU_count ~1, tpgeo)
+    #summary(lzn.vgm)
+    #plot(lzn.vgm)
+    ######################################################################################################################################################
+    # Kriging
+    kr <- autoKrige(tpgeo$OTU_count~1, tpgeo, griddf, model = "Exp", fix.values = c(0,NA,NA))
+    #cross.validation
+  #  kr.cv = autoKrige.cv(OTU_count~1, tpgeo, model = c("Exp"), nfold = 10)
+  #  RMSE <- sqrt(mean((kr.cv$krige.cv_output$residual)^2))
+   
+   tiff(filename = paste("./Mapping.single.sp/Mantel.0.05/Maps/",AAA,"/Understory",rownames(count_tab),"TRN",undr.otu$Transect[VVV],".tiff"), # Add transect label - same otu from multiple transects are being overwritten - adjust below also 
+            width=5, height=5, units="in", res=100)
+    plot(kr) # maps and error and Variogram
+#    plot(kr$krige_output) # just maps
+   dev.off()
+    un.ranges[VVV] <- kr$var_model[2,3]
+    un.otu[VVV] <- rownames(count_tab)
+    #un.rmse[VVV]<- RMSE
+    un.max[VVV] <- max(count_tab)
+    un.tax[VVV,] <- as(tax_table(physeq.subset), "matrix")
+    un.transect[VVV] <- undr.otu$Transect[VVV]
+    }, error=function(e){})
+    
+  }
+  
+  un.ranges <- as.data.frame(cbind(un.otu,un.transect,un.ranges,"Understory",un.max,un.tax))
+  #un.ranges$un.ranges <- as.numeric.factor(un.ranges$un.ranges)
+  #un.ranges$un.rmse <- as.numeric.factor(un.ranges$un.rmse)
+#  un.max$un.max <- as.numeric.factor(un.ranges$un.max)
+  names(un.ranges) <- c("OTU","Transect","Range","Habitat","Max.abun","Kingdom","Phylum","Class","Order","Family","Genus","Species")
+  summary(un.ranges$Range)
+  
+  
+  
+  gr.ranges = NULL
+  gr.otu <- NULL
+  #gr.rmse <- NULL
+  gr.max <- NULL
+  gr.transect <- NULL
+  gr.tax <- data.frame(matrix(ncol=7,nrow=0))
+  for (WWW in 1: nrow(grnd.otu)) {
+    tryCatch({ # this is a hack to skip errors when the kriging fails and breaks the loop 
+    sub_vst_physeq <- subset_samples(vst_physeq, Transect == grnd.otu$Transect[WWW] & Sample_Type == "Ground") #  subset the phyloseq object
+    physeq.subset <- subset_taxa(sub_vst_physeq, rownames(tax_table(sub_vst_physeq)) %in% grnd.otu$OTU[WWW]) # only keep the listed OTU
+    tax_table(physeq.subset) # what kind of fungus is this OTU?
+    count_tab <-  otu_table(physeq.subset) #this is an OTU table with abundences for the OTUs subsetted above 
+    count_tab[count_tab <= 0.0] <- 0.0
+    tp <-sample_data(physeq.subset)
+    all.equal(colnames(count_tab), rownames(tp)) # make sure meta-data and OTU match up
+    #going to need the tp$Transect_Short as numeric 
+    tp$Transect_Short <- as.numeric(levels(tp$Transect_Short))[tp$Transect_Short]
+    tp$Transect_Long <- as.numeric(levels(tp$Transect_Long))[tp$Transect_Long]
+    # Just grab the important stuff
+    tpgeo <- tp[,c("Transect_Short","Transect_Long")]
+    tpgeo <- cbind(tpgeo,t(count_tab))
+    colnames(tpgeo)[3] <- "OTU_count"
+    ##############################################################
+    # Change grid and sample points into a Spatial Data Frame  SPDF
+    coordinates(tpgeo) <- ~ Transect_Short + Transect_Long
+    ################################################################
+    # Compute and fit variogram 
+    #bbox(tpgeo)
+    lzn.vgm <- autofitVariogram(tpgeo$OTU_count ~1, tpgeo)
+    #summary(lzn.vgm)
+    #plot(lzn.vgm)
+    ######################################################################################################################################################
+    # Kriging
+   kr <- autoKrige(tpgeo$OTU_count~1, tpgeo, griddf, model = "Exp", fix.values = c(0,NA,NA))
+    #cross.validation
+#    kr.cv = autoKrige.cv(OTU_count~1, tpgeo, model = c("Exp"), nfold = 10)
+#    RMSE <- sqrt(mean((kr.cv$krige.cv_output$residual)^2))
+    
+    tiff(filename = paste("./Mapping.single.sp/Mantel.0.05/Maps/",AAA,"/Ground",rownames(count_tab),"TRN",grnd.otu$Transect[WWW],".tiff"),
+                  width=5, height=5, units="in", res=100)
+     plot(kr) # maps and error and Variogram
+#    plot(kr$krige_output) # just maps 
+    dev.off()
+    gr.ranges[WWW] <- kr$var_model[2,3]
+    gr.otu[WWW] <- rownames(count_tab)
+    #gr.rmse[WWW]<- RMSE
+    gr.max[WWW] <- max(count_tab)
+    gr.tax[WWW,] <- as(tax_table(physeq.subset), "matrix")
+    gr.transect[WWW] <- grnd.otu$Transect[WWW]
+    }, error=function(e){})
+    
+     }
+  
+  gr.ranges <- as.data.frame(cbind(gr.otu,gr.transect,gr.ranges,"Ground",gr.max,gr.tax))
+#  gr.ranges$gr.ranges <- as.numeric.factor(gr.ranges$gr.ranges)
+  #gr.ranges$gr.rmse <- as.numeric.factor(gr.ranges$gr.rmse)
+#  gr.max$gr.max <- as.numeric.factor(gr.ranges$gr.max)
+#  names(gr.ranges) <- c("OTU","Range","RMSE","Habitat","Max.abun")
+  names(gr.ranges) <- c("OTU","Transect","Range","Habitat","Max.abun","Kingdom","Phylum","Class","Order","Family","Genus","Species")
+  summary(gr.ranges$Range)
+
+  
+
+#wilcox.test(gr.ranges$Range,un.ranges$Range, exact = FALSE)
+
+
+
+aaa <- rbind(un.ranges,gr.ranges)
+write.table(aaa, file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",AAA,"otu.range.habitat.csv"), sep = ",", quote = FALSE, row.names = F)
+
+test2 <- cbind(min.occ =AAA,
+               p=wilcox.test(Range ~ Habitat, data = aaa, exact = FALSE)$p.value,
+                    gr.mean=summary(gr.ranges$Range)[4],
+                    un.mean=summary(un.ranges$Range)[4]) # I think this is checking the median [3], double check and change to [4] - for mean 
+test <- rbind(test,test2)	
+
+}
+write.table(test, file = paste("./Mapping.single.sp/Mantel.0.05/Maps/summary.otu.range.habitat.csv"), sep = ",", quote = FALSE, row.names = F)
+
+test$dif <- test$gr.mean-test$un.mean
+test
+
+# OTU min occurrence / mean ranges for Ground and Understory - pvalue for difference - 
+read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/summary.otu.range.habitat.csv"), header = TRUE)
+
+# This is the OTU and range for QQQ 
+take.a.look <-read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",10,"otu.range.habitat.csv"), header = TRUE)
+
+
+
+for (BBB in 2:24) {
+  
+take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.csv"), header = TRUE)
+take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+#take.a.look <- take.a.look[take.a.look$Range<30,]
+print(c(BBB,wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value))
+}
+
+
+
+
+summary(Range ~ Habitat, data = take.a.look)
+summary(take.a.look$Habitat)
+
+
+
+
+BBB=2 #min occur
+take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.csv"), header = TRUE)
+take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
+take.a.look <- take.a.look[take.a.look$Range<200,] # there are three OTU with large +247m ranges 
+# this is the table you will want to use for publication 
+take.a.look # OTU / Range / Habitat / Max.abun / Species
+take.a.look %>%
+  group_by(Habitat) %>%
+  summarise(
+    median = median(Range),
+    mean =mean(Range),
+    sd = sd(Range),
+    n = n(),
+    min.range = min(Range),
+    max.range = max(Range)
+  )
+
+  
+###########################################################################
+############################### GENERALISTS ###############################
+###########################################################################
+
+
+
+test <- data.frame(matrix(ncol=4,nrow=0))
+
+for (AAA in 2:30) {
+  
+  #AAA=12
+  #############
+  # Patch # - The loop was breaking because it would run too fast for dev (devices) and there would be a gazillion devices opened 
+  # so here we pause the loop for 15 seconds (let everything finish writing)
+  # and exit all devices (graphic.of()) 
+  Sys.sleep(5)
+  graphics.off()
+
+
+
+# load up the files 
+#########################
+#AAA=10
+# Mantel/ Moran
+grnd.otu = read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.gen.grnd.",AAA,".occur.results.csv"), header = TRUE)
+undr.otu = read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/sig.sa.gen.undr.",AAA,".occur.results.csv"), header = TRUE)
+
+#  Neither 
+#grnd.otu = read.csv(file = paste("./Mapping.single.sp/Non.sig/nonsig.sa.grnd.",AAA,".occur.results.csv"), header = TRUE)
+#undr.otu = read.csv(file = paste("./Mapping.single.sp/Non.sig/nonsig.sa.undr.",AAA,".occur.results.csv"), header = TRUE)
+
+# make a grid                     (this was made near line 38) #
+######################################################################################################################################################
+griddf
+
+
+
+# Some questions you could ask
+# how many OTU are found in spatially autocorrelated and found in both unterstory and soil
+# How does range differ for generalists in ground/soil 
+# how does range differ for the same OTU found in the same transect, but in different habitats. 
+# and of course #
+# how do generalists range compare with specialists...... (for specialists load lines 217-232)
+
+graphics.off()
+un.ranges = NULL
+un.otu <- NULL
+#un.rmse <- NULL
+un.max <- NULL
+un.transect <- NULL
+un.tax <- data.frame(matrix(ncol=7,nrow=0))
+#VVV=12
+for (VVV in 1: nrow(undr.otu)) {
+  tryCatch({ # this is a hack to skip errors when the kriging fails and breaks the loop 
+    sub_vst_physeq <- subset_samples(vst_physeq, Transect == undr.otu$Transect[VVV] & Sample_Type == "Understory") #  subset the phyloseq object
+    physeq.subset <- subset_taxa(sub_vst_physeq, rownames(tax_table(sub_vst_physeq)) %in% undr.otu$OTU[VVV]) # only keep the listed OTU
+    tax_table(physeq.subset) # what kind of fungus is this OTU?
+    count_tab <-  otu_table(physeq.subset) #this is an OTU table with abundences for the OTUs subsetted above 
+    count_tab[count_tab <= 0.0] <- 0.0
+    tp <-sample_data(physeq.subset)
+    all.equal(colnames(count_tab), rownames(tp)) # make sure meta-data and OTU match up
+    #going to need the tp$Transect_Short as numeric 
+    tp$Transect_Short <- as.numeric(levels(tp$Transect_Short))[tp$Transect_Short]
+    tp$Transect_Long <- as.numeric(levels(tp$Transect_Long))[tp$Transect_Long]
+    # Just grab the important stuff
+    tpgeo <- tp[,c("Transect_Short","Transect_Long")]
+    tpgeo <- cbind(tpgeo,t(count_tab))
+    colnames(tpgeo)[3] <- "OTU_count"
+    ##############################################################
+    # Change grid and sample points into a Spatial Data Frame  SPDF
+    coordinates(tpgeo) <- ~ Transect_Short + Transect_Long
+    ################################################################
+    # Compute and fit variogram 
+    #bbox(tpgeo)
+    lzn.vgm <- autofitVariogram(tpgeo$OTU_count ~1, tpgeo)
+    #summary(lzn.vgm)
+    #plot(lzn.vgm)
+    ######################################################################################################################################################
+    # Kriging
+    kr <- autoKrige(tpgeo$OTU_count~1, tpgeo, griddf, model = "Exp", fix.values = c(0,NA,NA))
+    #cross.validation
+    #  kr.cv = autoKrige.cv(OTU_count~1, tpgeo, model = c("Exp"), nfold = 10)
+    #  RMSE <- sqrt(mean((kr.cv$krige.cv_output$residual)^2))
+    
+    tiff(filename = paste("./Mapping.single.sp/Mantel.0.05/Maps/",AAA,"/Generalist.Understory",rownames(count_tab),"TRN",undr.otu$Transect[VVV],".tiff"),
+         width=5, height=5, units="in", res=100)
+    plot(kr) # maps and error and Variogram
+    #    plot(kr$krige_output) # just maps
+    dev.off()
+    un.ranges[VVV] <- kr$var_model[2,3]
+    un.otu[VVV] <- rownames(count_tab)
+    #un.rmse[VVV]<- RMSE
+    un.max[VVV] <- max(count_tab)
+    un.tax[VVV,] <- as(tax_table(physeq.subset), "matrix")
+    un.transect[VVV] <- undr.otu$Transect[VVV]
+  }, error=function(e){})
+  
+}
+
+un.ranges <- as.data.frame(cbind(un.otu,un.transect,un.ranges,"Understory",un.max,un.tax))
+#un.ranges$un.ranges <- as.numeric.factor(un.ranges$un.ranges)
+#un.ranges$un.rmse <- as.numeric.factor(un.ranges$un.rmse)
+#  un.max$un.max <- as.numeric.factor(un.ranges$un.max)
+names(un.ranges) <- c("OTU","Transect","Range","Habitat","Max.abun","Kingdom","Phylum","Class","Order","Family","Genus","Species")
+summary(un.ranges$Range)
+
+gen.un.ranges <- un.ranges
+
+################ Now do it for Ground Generalists ############################## (if the below code looks like it might be running the un... datasets - its not)
+graphics.off()
+undr.otu <- grnd.otu
+un.ranges = NULL
+un.otu <- NULL
+un.max <- NULL
+un.transect <- NULL
+un.tax <- data.frame(matrix(ncol=7,nrow=0))
+#VVV=12
+for (VVV in 1: nrow(undr.otu)) {
+  #Sys.sleep(1)
+  tryCatch({ # this is a hack to skip errors when the kriging fails and breaks the loop 
+    sub_vst_physeq <- subset_samples(vst_physeq, Transect == undr.otu$Transect[VVV] & Sample_Type == "Ground") #  subset the phyloseq object
+    physeq.subset <- subset_taxa(sub_vst_physeq, rownames(tax_table(sub_vst_physeq)) %in% undr.otu$OTU[VVV]) # only keep the listed OTU
+    tax_table(physeq.subset) # what kind of fungus is this OTU?
+    count_tab <-  otu_table(physeq.subset) #this is an OTU table with abundences for the OTUs subsetted above 
+    count_tab[count_tab <= 0.0] <- 0.0
+    tp <-sample_data(physeq.subset)
+    all.equal(colnames(count_tab), rownames(tp)) # make sure meta-data and OTU match up
+    #going to need the tp$Transect_Short as numeric 
+    tp$Transect_Short <- as.numeric(levels(tp$Transect_Short))[tp$Transect_Short]
+    tp$Transect_Long <- as.numeric(levels(tp$Transect_Long))[tp$Transect_Long]
+    # Just grab the important stuff
+    tpgeo <- tp[,c("Transect_Short","Transect_Long")]
+    tpgeo <- cbind(tpgeo,t(count_tab))
+    colnames(tpgeo)[3] <- "OTU_count"
+    ##############################################################
+    # Change grid and sample points into a Spatial Data Frame  SPDF
+    coordinates(tpgeo) <- ~ Transect_Short + Transect_Long
+    ################################################################
+    # Compute and fit variogram 
+    #bbox(tpgeo)
+    lzn.vgm <- autofitVariogram(tpgeo$OTU_count ~1, tpgeo)
+    #summary(lzn.vgm)
+    #plot(lzn.vgm)
+    ######################################################################################################################################################
+    # Kriging
+    kr <- autoKrige(tpgeo$OTU_count~1, tpgeo, griddf, model = "Exp", fix.values = c(0,NA,NA))
+    #cross.validation
+    #  kr.cv = autoKrige.cv(OTU_count~1, tpgeo, model = c("Exp"), nfold = 10)
+    #  RMSE <- sqrt(mean((kr.cv$krige.cv_output$residual)^2))
+    
+    tiff(filename = paste("./Mapping.single.sp/Mantel.0.05/Maps/",AAA,"/Generalist.Ground",rownames(count_tab),"TRN",undr.otu$Transect[VVV],".tiff"),
+         width=5, height=5, units="in", res=100)
+    plot(kr) # maps and error and Variogram
+    #    plot(kr$krige_output) # just maps
+    dev.off()
+    un.ranges[VVV] <- kr$var_model[2,3]
+    un.otu[VVV] <- rownames(count_tab)
+    #un.rmse[VVV]<- RMSE
+    un.max[VVV] <- max(count_tab)
+    un.tax[VVV,] <- as(tax_table(physeq.subset), "matrix")
+    un.transect[VVV] <- undr.otu$Transect[VVV]
+  }, error=function(e){})
+  
+}
+
+un.ranges <- as.data.frame(cbind(un.otu,un.transect,un.ranges,"Ground",un.max,un.tax))
+#un.ranges$un.ranges <- as.numeric.factor(un.ranges$un.ranges)
+#un.ranges$un.rmse <- as.numeric.factor(un.ranges$un.rmse)
+#  un.max$un.max <- as.numeric.factor(un.ranges$un.max)
+names(un.ranges) <- c("OTU","Transect","Range","Habitat","Max.abun","Kingdom","Phylum","Class","Order","Family","Genus","Species")
+summary(un.ranges$Range)
+
+gen.gr.ranges <- un.ranges
+
+test.gen <- rbind(gen.gr.ranges,gen.un.ranges)	
+test.gen <- test.gen[complete.cases(test.gen), ]
+write.table(test.gen, file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",AAA,"otu.range.habitat.generalist.csv"), sep = ",", quote = FALSE, row.names = F)
+
+
+
+
+test2 <- cbind(min.occ =AAA,
+               p=wilcox.test(Range ~ Habitat, data = test.gen, exact = FALSE)$p.value,
+               gr.mean=summary(gen.gr.ranges$Range)[4],
+               un.mean=summary(gen.un.ranges$Range)[4])
+test <- rbind(test,test2)	
+
+}
+write.table(test, file = paste("./Mapping.single.sp/Mantel.0.05/Maps/summary.otu.range.habitat.generalists.csv"), sep = ",", quote = FALSE, row.names = F)
+
+test$dif <- test$gr.mean-test$un.mean
+test
+
+
+for (BBB in 2:30) {
+  
+  take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
+  take.a.look <- take.a.look[take.a.look$Range>0.5,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+  #take.a.look <- take.a.look[take.a.look$Range<30,]
+  print(c(BBB,wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value))
+}
+
+
+
+
+
+
+BBB=2 #min occur
+take.a.look <- read.csv(file = paste("./Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
+take.a.look <- take.a.look[take.a.look$Range>.5,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+#take.a.look <- take.a.look[take.a.look$Range<30,]
+take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
+# this is the table you will want to use for publication 
+take.a.look # OTU / Range / Habitat / Max.abun / Species
+take.a.look %>%
+  group_by(Habitat) %>%
+  summarise(
+    median = median(Range),
+    mean =mean(Range),
+    sd = sd(Range),
+    n = n(),
+    min.range = min(Range),
+    max.range = max(Range)
+  )
+
+
+# take out the large xylaria
+#take.a.look <- take.a.look[c(1:43,45:88),]
+
+
+wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value
 
 
 
