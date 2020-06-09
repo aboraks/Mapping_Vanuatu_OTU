@@ -1,0 +1,158 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# following this site
+# http://www.seascapemodels.org/rstats/2017/02/22/spatial-statistics-photos.html
+rm(list=ls())
+#install.packages("labdsv")
+
+# Packages
+library("phyloseq")
+library("vegan")
+library("ggplot2")
+library("tidyr")
+library("dplyr")
+library("automap")
+library("mltools")
+########################################################################
+## FUNCTION
+########################################################################
+
+########################################################################
+## END of FUNCTION
+########################################################################
+
+
+#set WD
+setwd("/Users/fungi2/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+
+# load data
+# a transformed phyloseq object 
+vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
+
+
+
+#sample_data(vst_physeq)
+#tax_table(vst_physeq)
+#otu_table(vst_physeq)
+
+Tran <- unique(sample_data(vst_physeq)$Transect)
+
+w=1
+for (w in 1:length(Tran)) {
+  
+
+###################################
+## NMDS - Ground   ##
+###################################
+# load up the transformed count data
+vst_trans_count_tab <- otu_table(vst_physeq)
+sample <- sample_data(vst_physeq)
+sample$id.match <- paste(sample$Plot,sample$id)
+
+# Grab the sample IDs that corrospond to sample type and a single transect
+ground <- subset.data.frame(sample,Transect==Tran[w] & Sample_Type == "Ground")
+under <- subset.data.frame(sample,Transect==Tran[w] & Sample_Type == "Understory")
+
+ground <- ground[(ground$id.match %in% under$id.match),]
+under <- under[(under$id.match %in% ground$id.match),]
+
+
+otu_names <- rownames(ground)
+
+
+
+# And subset
+vst_trans_count_tab <- vst_trans_count_tab[,rownames(ground)]
+# order the two datasets 
+ground <- ground[order(row.names(ground)),] 
+vst_trans_count_tab <- vst_trans_count_tab[,order(colnames(vst_trans_count_tab))]
+vst_trans_count_tab[vst_trans_count_tab < 0.0] <- 0.0
+vst_trans_count_tab <- vst_trans_count_tab[ rowSums(vst_trans_count_tab)!=0,]
+all.equal(colnames(vst_trans_count_tab), rownames(ground))
+which(colSums(vst_trans_count_tab) < 10)
+which(rowSums(vst_trans_count_tab) == 0.0000)
+vst_ground <- vst_trans_count_tab
+
+vst_trans_count_tab <- otu_table(vst_physeq)
+# And subset
+vst_trans_count_tab <- vst_trans_count_tab[,rownames(under)]
+# order the two datasets 
+under <- under[order(row.names(under)),] 
+vst_trans_count_tab <- vst_trans_count_tab[,order(colnames(vst_trans_count_tab))]
+vst_trans_count_tab[vst_trans_count_tab < 0.0] <- 0.0
+vst_trans_count_tab <- vst_trans_count_tab[ rowSums(vst_trans_count_tab)!=0,]
+all.equal(colnames(vst_trans_count_tab), rownames(under))
+which(colSums(vst_trans_count_tab) < 10)
+which(rowSums(vst_trans_count_tab) == 0.0000)
+vst_under <- vst_trans_count_tab
+
+
+
+
+
+set.seed(2018)
+#decostand
+gr = decostand(t(vst_ground), method = "hellinger")
+# keep only sites in which at least one OTU was found
+gr = gr[rowSums(gr) != 0, ]  # 36 rows, 2450 columns
+un = decostand(t(vst_under), method = "hellinger")
+# keep only sites in which at least one OTU was found
+un = un[rowSums(un) != 0, ]  # 36 rows, 2450 columns
+
+
+pca.grd <- rda(gr)
+plot(pca.grd, scaling = 1, display = "sites", type = "text", 
+     main = "PCA for Species Data")
+
+
+pca.und <- rda(un)
+plot(pca.und, scaling = 1, display = "sites", type = "text", 
+     main = "PCA for Species Data")
+
+
+pro <- procrustes(Y = pca.und, X = pca.grd, scores = "sites", symmetric = TRUE)
+pro
+plot(pro, kind = 1, type = "text")
+plot(pro, kind = 2)
+print(Tran[w])
+print(protest(X = pca.und, Y = pca.grd, permutations = 9999))
+
+}
+
+
+# subset to a sample type
+Ssbst <- subset_samples(vst_physeq, Sample_Type == "Selaginella" & Transect== 1)
+#(Ssbst <- tax_glom(Ssbst, taxrank="Genus") ) #this is used to chop down the number of OTU's - so that only OTU's which were identified to Genus level are included in this loop
+Sotu_even <- getID(Ssbst)
+
+Gsbst <- subset_samples(vst_physeq, Sample_Type == "Ground" & Transect== 1)
+#(Gsbst <- tax_glom(Gsbst, taxrank="Genus") )#this is used to chop down the number of OTU's - so that only OTU's which were identified to Genus level are included in this loop
+Gotu_even <- getID(Gsbst)
+
+Usbst <- subset_samples(vst_physeq, Sample_Type == "Understory" & Transect== 1)
+#(Usbst <- tax_glom(Usbst, taxrank="Genus") )#this is used to chop down the number of OTU's - so that only OTU's which were identified to Genus level are included in this loop
+Uotu_even <- getID(Usbst)
+
+
+Gfungi <- Gotu_even[,(rownames(Gotu_even) %in% rownames(Uotu_even))]
+Ufungi <- Uotu_even[,(rownames(Uotu_even) %in% rownames(Gfungi))]
+
+
+Ufungi <- Ufungi[,(colnames(Ufungi) %in% colnames(Sfungi))]
+Gfungi <- Gfungi[,(colnames(Gfungi) %in% colnames(Sfungi))]
+
+otu_names <- colnames(Gotu_even)
+## Now we have a list of fungi (presence/absence) that are found in more than # (>=# (adjust in function @ bottom)) sample/transect for each sample type 
+
+# how many fungi are present in the list
+length(colnames(Gfungi))
+print(length(colnames(Gfungi)))
