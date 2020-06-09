@@ -7,14 +7,16 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 Here is a function used for this scripts 
+It makes a little bracket for the violin plots at the end of the script.
 ```{r}
 stat_box_data <- function(y, upper_limit = max(un.gr.gen$Range) * 1.15) {
   return( 
     data.frame(
       y = 0.95 * upper_limit,
       label = paste('count =', length(y), '\n',
-                    'mean =', round(mean(y), 2), '\n',
-                    'median =', round(median(y), 2), '\n')
+                    'mean =', round(mean(y), 2),'\n',
+                    'median =', round(median(y), 2), '\n')#,
+                    #'sd =', round(sd(y), 2), '\n',)
     )
   )
 }
@@ -54,7 +56,7 @@ and
 reallu small [DDD]
 models. CCC and DDD are in meters
 ```{r}
-CCC=10#meters
+CCC=13#meters
 DDD=1#meter 
 
 ```
@@ -76,11 +78,6 @@ Soil:Phyllosphere
 The generated table reads as follows:
 
 Transect___ p-value 
-2.000000 0.003948
-3.00000 0.01409
-4.00000 0.02414
-5.00000 0.05269
-6.00000 0.07298
 ```{r}
 # Specialists #
 for (BBB in 2:24) {
@@ -116,8 +113,9 @@ take.a.look %>%
 wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value
 ```
 
-Now run the same two loops (as above) but for 
 #Generalists
+Now run the same two loops (as above) but for generalists
+
 
 
 
@@ -196,12 +194,11 @@ wilcox.test(Range ~ Habitat, data = un.gr.gen, exact = FALSE)$p.value
 un.gr.gen$group <- paste(un.gr.gen$Habitat,un.gr.gen$SG)
 ```
 
+Now were going to remove Outliers, Bad-Variograms 
+and run a pairwise wilcox test - adjusting for multiple hypothesis testing 
 
-
-This is where you should mess around with outliers 
-"subset as above (eg#take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory))take.a.look <- take.a.look[take.a.look$Range<CCC,]# there are three OTU with large ranges - This is what they look like ->)""
 ```{r}
-CCC=15 #meters
+CCC=13 #meters
 DDD=1  #meter 
 un.gr.gen.spec <- un.gr.gen
 un.gr.gen <- un.gr.gen[un.gr.gen$Range>DDD,]
@@ -213,15 +210,23 @@ print(paste("After getting rid of outliers and bad variograms",nrow(un.gr.gen),"
 pairwise.wilcox.test(un.gr.gen$Range,un.gr.gen$group,p.adjust.method = "BH")
 
 ```
-This is a good table for 
+Here are two tables used for reference. One of them will be published as a reference table. 
+This table details all variograms including Outliers and bad Variograms 
+```{r}
+write.table(un.gr.gen.spec, file = paste("./Generated.Results/AllVariograms.csv"), sep = ",", quote = FALSE, row.names = F)
+```
+And this table has the OTUs used in the violin plot
+```{r}
+write.table(un.gr.gen.spec, file = paste("./Generated.Results/AllVariograms_OutliersBadRemoved.csv"), sep = ",", quote = FALSE, row.names = F)
+```
 
 
 Make a plot
-```{r}
+```{r `echo = FALSE`}
 # set the order you'd like
 un.gr.gen$group <- factor(un.gr.gen$group , levels=c("Understory Specialist", "Ground Specialist", "Understory Generalist", "Ground Generalist"))
 # annotation
-anno <- data.frame(x1 = 1, x2 = 2, y1 = 8, y2 = 8.5, xstar = 1.5, ystar = 8.7, lab = "***", SG = "Specialist")
+anno <- data.frame(x1 = 1.1, x2 = 1.9, y1 = 8, y2 = 8.5, xstar = 1.5, ystar = 8.7, lab = "***", SG = "Specialist")
 # change labels to more appropriate names 
 levels(un.gr.gen$Habitat)[match("Understory",levels(un.gr.gen$Habitat))] <- "Phyllosphere"
 levels(un.gr.gen$Habitat)[match("Ground",levels(un.gr.gen$Habitat))] <- "Soil"
@@ -230,10 +235,10 @@ levels(un.gr.gen$Habitat)[match("Ground",levels(un.gr.gen$Habitat))] <- "Soil"
 
 ggplot(un.gr.gen, aes(x = Habitat, y = Range, fill=Habitat)) +
   geom_violin() + 
-  stat_summary(fun.data = stat_box_data, 
-               geom = "text", 
+  stat_summary(fun.data = stat_box_data, # this is linked to the home-made function at the top 
+               geom = "text", # and places the locations of mean/median/n
                hjust = 0.5,
-               vjust = 0.9) +
+               vjust = 0.6) +
   stat_summary(fun.y = mean, 
                fun.ymin = mean, 
                fun.ymax = mean, 
@@ -263,9 +268,8 @@ ggplot(un.gr.gen, aes(x = Habitat, y = Range, fill=Habitat)) +
 ```
 Save the plot
 ```{r}
-ggsave("./Generated.Results/OTU range size.pdf", plot = last_plot(), device = NULL, path = NULL,
+ggsave("./Generated.Results/OTU range size.tiff", plot = last_plot(), device = NULL, path = NULL,
        scale = 1, width = 14, height = 8, units = "in", 
        dpi = 150, limitsize = TRUE)
 
 ```
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

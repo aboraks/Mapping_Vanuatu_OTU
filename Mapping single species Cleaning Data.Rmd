@@ -878,6 +878,22 @@ write.table(sig.results.grnd, file = paste("./Generated.Results/sig.sa.gen.grnd.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #########################################################################################################################################################
 #########################################################################################################################################################
 #########################################################################################################################################################
@@ -885,12 +901,33 @@ write.table(sig.results.grnd, file = paste("./Generated.Results/sig.sa.gen.grnd.
 ##############################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
 
 
-Some of the code below may be redundant depending on what the violin-pokt.r says
+Most of the code below may be redundant based on what is published in violin-plot.r 
+
+One thing that is very important from this code is the generated csv:
+otu.range.habitat.csv
+
+The violin.plot.r script cannot run without it. 
 
 
 
 
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 ##This next section comes from the code titled:
 /Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.Single.Species.KriegLoop
