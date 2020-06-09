@@ -245,121 +245,33 @@ names(full.table)
 
 ``` r
 ggplot(data=full.table, aes(x=Occupancy, y=Avg.Abund, col=Habitat))+
-  geom_point(alpha = 7/10, size = 0.9)+
+  geom_point(alpha = 4/10, size = 0.7)+
   scale_colour_manual(values=ground.und.colours)+
   stat_smooth(method='loess')+
   facet_grid(.~lifestyle)+
   #scale_color_viridis() +
-  theme() +
-  labs(title = "Interspecific Occupancy–abundance relationship") +
-  xlab(paste("Transect occupancy \n (number of occurences / transect)")) +
-  ylab(paste("Local abundance \n (OTU sequence reads/number of occurences)")) 
+  #labs(title = "Interspecific Occupancy–abundance relationship") +
+  xlab(paste("Transect occupancy"))+ # \n (number of occurences / transect)")) +
+  ylab(paste("Local abundance"))+ # \n (OTU sequence reads/number of occurences)")) +
+    theme(panel.background = element_rect(fill = "white", colour = "black"),
+        strip.background = element_rect(fill = "white", colour = "black"),
+        #legend.key = element_blank(),
+        legend.justification = c(1.1, 0),# x-axis 
+        legend.position = c(1, 0.75),# y-axis
+        legend.title = element_blank(),
+        strip.text.x = element_text(size=12, face="bold"))
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
-
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <e2>
-
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <80>
-
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on 'Interspecific Occupancy–abundance relationship' in
-    ## 'mbcsToSbcs': dot substituted for <93>
+![](Mapping.Single.Species.Figure3.lm-pres_occ_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 And save it
 
 ``` r
-ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abundance.MinTransectOccur",BBB,".jpg"), device = NULL, path = NULL,
-        scale = 1, width = 18, height = 9, units = "in", 
-        dpi = 200, limitsize = TRUE)
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abundance.MinTransectOccur",BBB,".pdf"), device = NULL, path = NULL,
+        scale = 1, width = 180, height = 100, units = "mm", 
+        dpi = 300, limitsize = TRUE)
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
