@@ -38,7 +38,7 @@ suppressPackageStartupMessages({
 These parameters are going to to control outliers and garbage variograms
 #Outliers
 Some of the estimated ranges are really big!! For example most OTU range sizes are in around 3 meters 
-Several ranges are extimated at several kilometers. Their variograms seem robust, but their really throwing the entire analysis 
+Several ranges are extimated at several kilometers. Their variograms seem robust, but their really throwing the analysis and figures
 #garbage variograms
 a lot of auto-generated variograms were bad models
 It turns out most of these bad models were estimating really small ranges (<1 m). Since our minimum sampling distance was 3.3 m, it's hard to imagine a model infering smaller distances than what we sampled
@@ -81,8 +81,8 @@ Transect___ p-value
 for (BBB in 2:24) {
   take.a.look <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.csv"), header = TRUE)
   take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
-  take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
-  take.a.look <- take.a.look[take.a.look$Range<CCC,] # some ranges are really big
+  #take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+  #take.a.look <- take.a.look[take.a.look$Range<CCC,] # some ranges are really big
   print(c(BBB,wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value))
 }
 ```
@@ -93,8 +93,8 @@ This will give us a nicer table of differences between the two habitas
 BBB=2 #min occur
 take.a.look <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.csv"), header = TRUE)
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
-take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
-take.a.look <- take.a.look[take.a.look$Range<CCC,] # there are three OTU with large ranges - This is what they look like -> take.a.look[take.a.look$Range>30,]
+#take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+#take.a.look <- take.a.look[take.a.look$Range<CCC,] # there are three OTU with large ranges - This is what they look like -> take.a.look[take.a.look$Range>30,]
 spec <- take.a.look
 # this is the table you will want to use for publication 
 #take.a.look # OTU / Range / Habitat / Max.abun / Species
@@ -125,8 +125,8 @@ Soil:Phyllosphere
 # Generalists #
 for (BBB in 2:30) { # which occupancy has significant p-values 
   take.a.look <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
-  take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
-  take.a.look <- take.a.look[take.a.look$Range<CCC,]
+#  take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+#  take.a.look <- take.a.look[take.a.look$Range<CCC,]
   print(c(BBB,wilcox.test(Range ~ Habitat, data = take.a.look, exact = FALSE)$p.value))
 }
 ```
@@ -136,8 +136,8 @@ for (BBB in 2:30) { # which occupancy has significant p-values
 BBB=2 #min occur
 take.a.look <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
-take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
-take.a.look <- take.a.look[take.a.look$Range<CCC,]# there are three OTU with large ranges - This is what they look like -> take.a.look[take.a.look$Range>30,]
+#take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
+#take.a.look <- take.a.look[take.a.look$Range<CCC,]# there are three OTU with large ranges - This is what they look like -> take.a.look[take.a.look$Range>30,]
 genr <- take.a.look
 #take.a.look # OTU / Range / Habitat / Max.abun / Species
 take.a.look %>%
@@ -189,9 +189,27 @@ wilcox.test(Range ~ Habitat, data = genr, exact = FALSE)$p.value
 wilcox.test(Range ~ Habitat, data = un.gr.gen, exact = FALSE)$p.value
 
 un.gr.gen$group <- paste(un.gr.gen$Habitat,un.gr.gen$SG)
+```
+
+
+
+This is where you should mess around with outliers 
+"subset as above (eg#take.a.look <- take.a.look[take.a.look$Range>DDD,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory))take.a.look <- take.a.look[take.a.look$Range<CCC,]# there are three OTU with large ranges - This is what they look like ->)""
+```{r}
+CCC=15 #meters
+DDD=1  #meter 
+un.gr.gen.spec <- un.gr.gen
+un.gr.gen <- un.gr.gen[un.gr.gen$Range>DDD,]
+print(paste(nrow(un.gr.gen),"/",nrow(un.gr.gen.spec),"OTUs retained because their ranges were greater than",DDD,"meters"))
+un.gr.gen <- un.gr.gen[un.gr.gen$Range<CCC,]
+print(paste(nrow(un.gr.gen.spec[un.gr.gen.spec$Range<CCC,]),"/",nrow(un.gr.gen.spec),"OTUs retained because their ranges were greater than",CCC,"meters"))
+print(paste("After getting rid of outliers and bad variograms",nrow(un.gr.gen),"/",nrow(un.gr.gen.spec),"OTUs remain"))
+
 pairwise.wilcox.test(un.gr.gen$Range,un.gr.gen$group,p.adjust.method = "BH")
 
 ```
+This is a good table for 
+
 
 Make a plot
 ```{r}
@@ -218,7 +236,7 @@ ggplot(un.gr.gen, aes(x = Habitat, y = Range, fill=Habitat)) +
                width = 0.3)+
   geom_jitter(shape=16, size=.3, position=position_jitter(0.3))+
   scale_x_discrete(name = "") + 
-  scale_y_continuous(name = "OTU patch radius size (m)") +
+  scale_y_continuous(name = "OTU patch radius size (m)", limits = c(1,15)) +
   scale_fill_grey(start = 0.4, end = 0.9) +
   facet_grid(. ~ SG) +
   geom_text(data = anno, aes(x = xstar,  y = ystar, label = lab,fill=NULL),family = "Times") +
