@@ -12,7 +12,7 @@ It makes a little bracket for the violin plots at the end of the script.
 stat_box_data <- function(y, upper_limit = max(un.gr.gen$Range) * 1.15) {
   return( 
     data.frame(
-      y = 0.95 * upper_limit,
+      y = 0.97 * upper_limit,
       label = paste('count =', length(y), '\n',
                     'mean =', round(mean(y), 2),'\n',
                     'median =', round(median(y), 2), '\n')#,
@@ -268,8 +268,8 @@ ggplot(un.gr.gen, aes(x = Habitat, y = Range, fill=Habitat)) +
 ```
 Save the plot
 ```{r}
-ggsave("./Generated.Results/OTU range size.tiff", plot = last_plot(), device = NULL, path = NULL,
-       scale = 1, width = 14, height = 8, units = "in", 
-       dpi = 150, limitsize = TRUE)
+ggsave("./Generated.Results/OTU range size.pdf", plot = last_plot(), device = NULL, path = NULL,
+       scale = 1, width = 180, height = 100, units = "mm", 
+       dpi = 300, limitsize = TRUE)
 
 ```
