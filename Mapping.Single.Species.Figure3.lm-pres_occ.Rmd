@@ -7,24 +7,112 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## GitHub Documents
+```{r}
+library(ggplot2)
+```
+Set the minimum number of occurences an OTU must appear in a transect
 
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
-
-## Including Code
-
-You can include R code in the document as follows:
-
-```{r cars}
-summary(cars)
+This is not so important within this rmd code, but it was really important while setting up the project. 
+See "./Users/fungi2/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.Single.Species.Figure3.lm-pres_occ.R""
+```{r}
+BBB=2
 ```
 
-## Including Plots
+```{r}
+#setwd("/Users/fungi2/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+# Load up the required CSV
+BBB=2
+gr.spec <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.grnd.",BBB,".occur.results.csv"), header = TRUE)
+un.spec <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.undr.",BBB,".occur.results.csv"), header = TRUE)
+ungr.gen <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/gen.grnd.undr.",BBB,".occur.results.csv"), header = TRUE)
+
+par(mfrow=c(2,2))
+scatter.smooth(x=gr.spec$Ground.PA, y=gr.spec$Ground.abund/gr.spec$Ground.PA, 
+               main="Soil Specialist", 
+               xlab="Transect occupancy", ylab="Abundance/Occupancy",
+               lpars = list(col = "red", lwd = 3, lty = 3), pch = 3) 
+linearMod <- lm(Ground.abund/gr.spec$Ground.PA ~ Ground.PA, data=gr.spec)  # build linear regression model on full data
+summary(linearMod)
+
+scatter.smooth(x=un.spec$Under.PA, y=un.spec$Under.abund/un.spec$Under.PA, 
+               main="Phyllosphere Specialist", 
+               xlab="Transect occupancy", ylab="Abundance/Occupancy",
+               lpars = list(col = "red", lwd = 3, lty = 3), pch = 3) 
+linearMod <- lm(Under.abund ~ Under.PA, data=un.spec)  # build linear regression model on full data
+summary(linearMod)
+
+
+scatter.smooth(x=ungr.gen$Ground.PA, y=ungr.gen$Ground.abund/ungr.gen$Ground.PA, 
+               main="Soil Generalists", 
+               xlab="Transect occupancy", ylab="Abundance/Occupancy",
+               lpars = list(col = "red", lwd = 3, lty = 3), pch = 3) 
+linearMod <- lm(Ground.abund ~ Ground.PA, data=ungr.gen)  # build linear regression model on full data
+summary(linearMod)
+
+scatter.smooth(x=ungr.gen$Under.PA, y=ungr.gen$Under.abund/ungr.gen$Under.PA,
+               main="Phyllosphere Generalists", 
+               xlab="Transect occupancy", ylab="Abundance/Occupancy",
+               lpars = list(col = "red", lwd = 3, lty = 3), pch = 3) 
+linearMod <- lm(Ground.abund ~ Ground.PA, data=ungr.gen)  # build linear regression model on full data
+summary(linearMod)
+dev.off()
+
+
+####################################################################
+gr.spec2 <- gr.spec[,1:3]
+gr.spec2$ID <- "Soil.Specialist"
+gr.spec2$Habitat <- "Soil"
+gr.spec2$Lifestyle <- "Specialist"
+names(gr.spec2) <- c("OTU","Abundance","Occupancy","ID","Habitat","lifestyle")
+
+un.spec2 <- un.spec[,c(1,4:5)]
+un.spec2$ID <- "Phyllo.Specialist"
+un.spec2$Habitat <- "Phyllosphere"
+un.spec2$Lifestyle <- "Specialist"
+names(un.spec2) <- c("OTU","Abundance","Occupancy","ID","Habitat","lifestyle")
+
+ungr.gen 
+gr.gen <- ungr.gen[,1:3]
+gr.gen$ID <- "Soil.Generalist"
+gr.gen$Habitat <- "Soil"
+gr.gen$Lifestyle <- "Generalist"
+names(gr.gen) <-  c("OTU","Abundance","Occupancy","ID","Habitat","lifestyle")
+
+un.gen <- ungr.gen[,c(1,4:5)]
+un.gen$ID <- "Phyllo.Generalist"
+un.gen$Habitat <- "Phyllosphere"
+un.gen$Lifestyle <- "Generalist"
+names(un.gen) <-  c("OTU","Abundance","Occupancy","ID","Habitat","lifestyle")
+
+
+full.table <- rbind(gr.spec2,un.spec2,gr.gen,un.gen)
+full.table$Avg.Abund <- full.table$Abundance/full.table$Occupancy
+
+
+#Set colour palette
+ground.und.colours <- c( "#669900","#996600")
+
+names(full.table)
+ggplot(data=full.table, aes(x=Occupancy, y=Avg.Abund, col=Habitat))+
+  geom_point(alpha = 7/10, size = 0.9)+
+  scale_colour_manual(values=ground.und.colours)+
+  stat_smooth(method='loess')+
+  facet_grid(.~lifestyle)+
+  #scale_color_viridis() +
+  theme() +
+  labs(title = "Interspecific Occupancy–abundance relationship") +
+  xlab(paste("Transect occupancy \n (number of occurences / transect)")) +
+  ylab(paste("Local abundance \n (OTU sequence reads/number of occurences)")) 
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+And save it 
+```{r}
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abundance.MinTransectOccur",BBB,".jpg"), device = NULL, path = NULL,
+        scale = 1, width = 18, height = 9, units = "in", 
+        dpi = 200, limitsize = TRUE)
+```
+
