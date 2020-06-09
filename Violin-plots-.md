@@ -345,60 +345,7 @@ And this table has the OTUs used in the violin plot
 write.table(un.gr.gen.spec, file = paste("./Generated.Results/AllVariograms_OutliersBadRemoved.csv"), sep = ",", quote = FALSE, row.names = F)
 ```
 
-Make a plot
-
-``` r
-# set the order you'd like
-un.gr.gen$group <- factor(un.gr.gen$group , levels=c("Understory Specialist", "Ground Specialist", "Understory Generalist", "Ground Generalist"))
-# annotation
-anno <- data.frame(x1 = 1.1, x2 = 1.9, y1 = 8, y2 = 8.5, xstar = 1.5, ystar = 8.7, lab = "***", SG = "Specialist")
-# change labels to more appropriate names 
-levels(un.gr.gen$Habitat)[match("Understory",levels(un.gr.gen$Habitat))] <- "Phyllosphere"
-levels(un.gr.gen$Habitat)[match("Ground",levels(un.gr.gen$Habitat))] <- "Soil"
-
-
-
-ggplot(un.gr.gen, aes(x = Habitat, y = Range, fill=Habitat)) +
-  geom_violin() + 
-  stat_summary(fun.data = stat_box_data, # this is linked to the home-made function at the top 
-               geom = "text", # and places the locations of mean/median/n
-               hjust = 0.5,
-               vjust = 0.6) +
-  stat_summary(fun.y = mean, 
-               fun.ymin = mean, 
-               fun.ymax = mean, 
-               geom = "crossbar", 
-               width = 0.3)+
-  geom_jitter(shape=16, size=.3, position=position_jitter(0.3))+
-  scale_x_discrete(name = "") + 
-  scale_y_continuous(name = "OTU patch radius size (m)", limits = c(1,15)) +
-  scale_fill_grey(start = 0.4, end = 0.9) +
-  facet_grid(. ~ SG) +
-  geom_text(data = anno, aes(x = xstar,  y = ystar, label = lab,fill=NULL),family = "Times") +
-  geom_segment(data = anno, aes(x = x1, xend = x1, 
-                                y = y1, yend = y2,fill=NULL),
-               colour = "black") +
-  geom_segment(data = anno, aes(x = x2, xend = x2, 
-                                y = y1, yend = y2,fill=NULL),
-               colour = "black") +
-  geom_segment(data = anno, aes(x = x1, xend = x2, 
-                                y = y2, yend = y2,fill=NULL),
-               colour = "black")+
-  theme(panel.background = element_rect(fill = "white", colour = "black"),
-        strip.background = element_rect(fill = "white", colour = "black"),
-        legend.key = element_blank(),
-        legend.position = "none",
-        legend.title = element_blank(),
-        strip.text.x = element_text(size=12, face="bold"))
-```
-
-    ## Warning: `fun.y` is deprecated. Use `fun` instead.
-
-    ## Warning: `fun.ymin` is deprecated. Use `fun.min` instead.
-
-    ## Warning: `fun.ymax` is deprecated. Use `fun.max` instead.
-
-![](Violin-plots-_files/figure-markdown_github/%60echo=FALSE%60-1.png) Save the plot
+Make a plot ![](Violin-plots-_files/figure-markdown_github/unnamed-chunk-13-1.png) Save the plot
 
 ``` r
 ggsave("./Generated.Results/OTU range size.tiff", plot = last_plot(), device = NULL, path = NULL,

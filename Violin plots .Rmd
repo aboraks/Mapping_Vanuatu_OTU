@@ -210,7 +210,7 @@ print(paste("After getting rid of outliers and bad variograms",nrow(un.gr.gen),"
 pairwise.wilcox.test(un.gr.gen$Range,un.gr.gen$group,p.adjust.method = "BH")
 
 ```
-Here are two tables used for reference. One of them will be published as a reference table. 
+Here are two csv tables used for reference. One of them will be published as a reference table. 
 This table details all variograms including Outliers and bad Variograms 
 ```{r}
 write.table(un.gr.gen.spec, file = paste("./Generated.Results/AllVariograms.csv"), sep = ",", quote = FALSE, row.names = F)
@@ -222,7 +222,7 @@ write.table(un.gr.gen.spec, file = paste("./Generated.Results/AllVariograms_Outl
 
 
 Make a plot
-```{r `echo = FALSE`}
+```{r, echo=FALSE, warning=FALSE}
 # set the order you'd like
 un.gr.gen$group <- factor(un.gr.gen$group , levels=c("Understory Specialist", "Ground Specialist", "Understory Generalist", "Ground Generalist"))
 # annotation
