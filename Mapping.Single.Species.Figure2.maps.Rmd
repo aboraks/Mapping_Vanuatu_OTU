@@ -21,11 +21,18 @@ library("ggplot2")
 #require(tibble)
 #library(reshape2)
 ```
-load up the fungal data csv file and set working directory
+load up the fungal data csv file 
 ```{r}
 # setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
 vst_physeq <- readRDS(file = "~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/vst_physeq_geog.rds") ## a phyloseq object containing a transformed otu table 
 ```
+
+Check to see if there is a directory that can hold all the generated results. If not, make one
+```{r}
+dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+```
+
+
 We're going to need a lattice to overlay our plotting variables.
 ```{r}
 start_lat <- 0
