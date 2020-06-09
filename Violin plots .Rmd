@@ -33,6 +33,11 @@ suppressPackageStartupMessages({
   library(magrittr)
 })
 ```
+Check to see if there is a directory that can hold all the generated results. If not, make one
+```{r}
+dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+```
+
 
 #Parameters
 These parameters are going to to control outliers and garbage variograms
@@ -258,7 +263,7 @@ ggplot(un.gr.gen, aes(x = Habitat, y = Range, fill=Habitat)) +
 ```
 Save the plot
 ```{r}
-ggsave("OTU range size.pdf", plot = last_plot(), device = NULL, path = NULL,
+ggsave("./Generated.Results/OTU range size.pdf", plot = last_plot(), device = NULL, path = NULL,
        scale = 1, width = 14, height = 8, units = "in", 
        dpi = 150, limitsize = TRUE)
 

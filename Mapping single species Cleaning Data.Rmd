@@ -105,6 +105,10 @@ library(ape)
 require(tidyr)
 
 ```
+Check to see if there is a directory that can hold all the generated results. If not, make one
+```{r}
+dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+```
 load the fungal data
 ```{r warning=False}
 # Set working directory 
