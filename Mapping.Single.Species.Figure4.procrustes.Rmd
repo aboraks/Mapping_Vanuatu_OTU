@@ -46,6 +46,14 @@ sbst <- subset_samples(vst_physeq, Sample_Type == c("Understory","Ground"))
      otu_table(sbst) <- count_tab # and reinsert into the phylloseq object 
  sample_sums(sbst)[1:10] # double check to make sure tha worked 
 ```
+A quick name shuffle to make IDs more meaningfull 
+```{r}
+change_id <-  sample_data(sbst)
+levels(change_id$Sample_Type)[match("Ground",levels(change_id$Sample_Type))] <- "Soil"
+levels(change_id$Sample_Type)[match("Understory",levels(change_id$Sample_Type))] <- "Phyllosphere"
+sample_data(sbst) <- change_id
+
+```
 
 ```{r}
 GP.ord <- ordinate(sbst, "NMDS", "bray")
@@ -57,11 +65,47 @@ sample_data(sbst)$Transect <- as(sample_data(sbst)$Transect, "character")
 ```
 
 ```{r}
+#Set colour palette
+ground.und.colours <- c("#996600","#669900")
+# change labels to more appropriate names 
+
+
+
 p2 = plot_ordination(sbst, GP.ord,color="Sample_Type")#, shape = "Transect")
 p2 + 
   #geom_polygon(aes(fill=Sample_Type)) + 
-  geom_point(size=2) + 
+  geom_point() + 
+  scale_colour_manual(values=ground.und.colours)+
   stat_ellipse() +
- theme_bw() 
+  xlab("NMDS - axis 1")+
+  ylab("NMDS - axis 2")+
+  theme(panel.background = element_rect(fill = "white", colour = "black"),
+        strip.background = element_rect(fill = "white", colour = "black"),
+        #legend.key = element_blank(),
+        #legend.justification = c(1.1, 0),# x-axis 
+        legend.position = c(0.79, 0.13),# x,y
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "lightgrey",
+                                  size=0.2, linetype="solid",
+                                  colour ="black"))
+
  #labs(title = "NMDS Plot")
 ```
+
+Time for a PermANOVA (adonis)
+```{r}
+sbst_bray <- phyloseq::distance(sbst, method = "bray")
+sampledf <- data.frame(sample_data(sbst))
+adonis(sbst_bray ~ Sample_Type, data = sampledf)
+
+```
+
+
+
+And save it 
+```{r}
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/NMDS_SoilPhyllosphere.pdf"), device = NULL, path = NULL,
+        scale = 1, width = 88, height = 88, units = "mm", 
+        dpi = 300, limitsize = TRUE)
+```
+
