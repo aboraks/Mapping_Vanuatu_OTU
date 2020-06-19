@@ -134,25 +134,28 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abun
         dpi = 300, limitsize = TRUE)
 ```
 
-
+#Non-parametric tests
+Do not report means and standard deviations for non-parametric tests. Report the median
+and range in the text or in a table
 
 
 ```{r}
 
 mu <- ddply(full.table, "ID", summarise,# grp.mean=mean(Occupancy))
- mean = round(mean(Occupancy), 2),
- sd = round(sd(Occupancy), 2),
- IQR = round(IQR(Occupancy), 2))
-
-
-head(mu)
-
-wilcox.test(Occupancy ~ lifestyle, data = full.table, exact = FALSE)
+ median = round(median(Occupancy), 2),
+  IQR = round(IQR(Occupancy), 2),
+ N = round(length(Occupancy), 2),
+  mean = round(mean(Occupancy), 2),
+ sd = round(sd(Occupancy), 2))
 
 ```
+Test for differences
 ```{r}
+
 pairwise.wilcox.test(full.table$Occupancy,full.table$ID,p.adjust.method = "BH")
+#wilcox.test(Occupancy ~ lifestyle, data = full.table, exact = FALSE)
 ```
+
 
 #Area occupancy 
 
