@@ -133,3 +133,22 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abun
         dpi = 300, limitsize = TRUE)
 ```
 
+
+
+#Area occupancy 
+
+We're going to make a histogram of Occupancy x OTU count 
+Separated by habitat and life history 
+
+
+
+
+
+
+
+
+
+
+
+
+
