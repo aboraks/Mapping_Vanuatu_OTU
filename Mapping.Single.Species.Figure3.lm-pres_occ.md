@@ -3,6 +3,7 @@ Untitled
 
 ``` r
 library(ggplot2)
+library(plyr)
 ```
 
 Check to see if there is a directory that can hold all the generated results. If not, make one
@@ -275,3 +276,86 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abun
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
+
+Non-parametric tests
+====================
+
+Do not report means and standard deviations for non-parametric tests. Report the median and range in the text or in a table
+
+``` r
+mu <- ddply(full.table, "ID", summarise,# grp.mean=mean(Occupancy))
+ median = round(median(Occupancy), 2),
+  IQR = round(IQR(Occupancy), 2),
+ N = round(length(Occupancy), 2),
+  mean = round(mean(Occupancy), 2),
+ sd = round(sd(Occupancy), 2))
+
+
+print(mu)
+```
+
+    ##                  ID median IQR    N  mean   sd
+    ## 1 Phyllo.Generalist      6  12 2280 10.36 9.98
+    ## 2 Phyllo.Specialist      3   3 4786  4.54 4.38
+    ## 3   Soil.Generalist      4   6 2280  7.41 7.36
+    ## 4   Soil.Specialist      3   4 4111  4.88 4.51
+
+Test for differences
+
+``` r
+pairwise.wilcox.test(full.table$Occupancy,full.table$ID,p.adjust.method = "BH")
+```
+
+    ## 
+    ##  Pairwise comparisons using Wilcoxon rank sum test 
+    ## 
+    ## data:  full.table$Occupancy and full.table$ID 
+    ## 
+    ##                   Phyllo.Generalist Phyllo.Specialist Soil.Generalist
+    ## Phyllo.Specialist < 2e-16           -                 -              
+    ## Soil.Generalist   < 2e-16           < 2e-16           -              
+    ## Soil.Specialist   < 2e-16           1.7e-06           < 2e-16        
+    ## 
+    ## P value adjustment method: BH
+
+``` r
+#wilcox.test(Occupancy ~ lifestyle, data = full.table, exact = FALSE)
+```
+
+Area occupancy
+==============
+
+We're going to make a histogram of Occupancy x OTU count Separated by habitat and life history
+
+``` r
+#colo <-c("#F0E442","#009E73") #Printer friendly / colour blind frinedly colours 
+colo <- c("#404080", "#69b3a2","#404080", "#69b3a2") #These are also nice 
+
+
+ggplot(data = full.table, aes(x=Occupancy, fill=lifestyle)) +
+    geom_histogram(binwidth = 3, alpha=0.3, position = 'identity')+
+  scale_fill_manual(values=colo)+
+  #geom_vline(data=mu, aes(xintercept=mean, color=lifestyle),
+   #          linetype="dotted", color=colo, size=1)+
+   scale_y_continuous(trans = "log10") +
+   facet_wrap(~Habitat, scales = 'free_x') +
+   xlab(paste("Transect occupancy"))+ # \n (number of occurences / transect)")) +
+   ylab(paste("Unique OTU count"))+ # \n (OTU sequence reads/number of occurences)")) +
+   theme(panel.background = element_rect(fill = "white", colour = "black"),
+        strip.background = element_rect(fill = "white", colour = "black"),
+        #legend.key = element_blank(),
+        legend.justification = c(1.1, 0),# x-axis 
+        legend.position = c(1, 0.75),# y-axis
+        legend.title = element_blank(),
+        strip.text.x = element_text(size=12, face="bold"))
+```
+
+![](Mapping.Single.Species.Figure3.lm-pres_occ_files/figure-markdown_github/unnamed-chunk-9-1.png)
+
+And save it
+
+``` r
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/Area_occurence.pdf"), device = NULL, path = NULL,
+        scale = 1, width = 180, height = 100, units = "mm", 
+        dpi = 300, limitsize = TRUE)
+```
