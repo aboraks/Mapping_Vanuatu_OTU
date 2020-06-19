@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(ggplot2)
+library(plyr)
 ```
 
 Check to see if there is a directory that can hold all the generated results. If not, make one
@@ -135,18 +136,61 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abun
 
 
 
+
+```{r}
+
+mu <- ddply(full.table, "ID", summarise,# grp.mean=mean(Occupancy))
+ mean = round(mean(Occupancy), 2),
+ sd = round(sd(Occupancy), 2),
+ IQR = round(IQR(Occupancy), 2))
+
+
+head(mu)
+
+wilcox.test(Occupancy ~ lifestyle, data = full.table, exact = FALSE)
+
+```
+```{r}
+pairwise.wilcox.test(full.table$Occupancy,full.table$ID,p.adjust.method = "BH")
+```
+
 #Area occupancy 
 
 We're going to make a histogram of Occupancy x OTU count 
 Separated by habitat and life history 
 
 
+```{r}
+#colo <-c("#F0E442","#009E73") #Printer friendly / colour blind frinedly colours 
+colo <- c("#404080", "#69b3a2","#404080", "#69b3a2") #These are also nice 
 
 
+ggplot(data = full.table, aes(x=Occupancy, fill=lifestyle)) +
+    geom_histogram(binwidth = 3, alpha=0.3, position = 'identity')+
+  scale_fill_manual(values=colo)+
+  #geom_vline(data=mu, aes(xintercept=mean, color=lifestyle),
+   #          linetype="dotted", color=colo, size=1)+
+   scale_y_continuous(trans = "log10") +
+   facet_wrap(~Habitat, scales = 'free_x') +
+   xlab(paste("Transect occupancy"))+ # \n (number of occurences / transect)")) +
+   ylab(paste("Unique OTU count"))+ # \n (OTU sequence reads/number of occurences)")) +
+   theme(panel.background = element_rect(fill = "white", colour = "black"),
+        strip.background = element_rect(fill = "white", colour = "black"),
+        #legend.key = element_blank(),
+        legend.justification = c(1.1, 0),# x-axis 
+        legend.position = c(1, 0.75),# y-axis
+        legend.title = element_blank(),
+        strip.text.x = element_text(size=12, face="bold"))
+
+```
 
 
-
-
+And save it 
+```{r}
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/Area_occurence.pdf"), device = NULL, path = NULL,
+        scale = 1, width = 180, height = 100, units = "mm", 
+        dpi = 300, limitsize = TRUE)
+```
 
 
 
