@@ -148,6 +148,8 @@ mu <- ddply(full.table, "ID", summarise,# grp.mean=mean(Occupancy))
   mean = round(mean(Occupancy), 2),
  sd = round(sd(Occupancy), 2))
 
+
+print(mu)
 ```
 Test for differences
 ```{r}
