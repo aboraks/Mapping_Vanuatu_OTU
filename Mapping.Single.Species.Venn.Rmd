@@ -1,0 +1,32 @@
+---
+title: "Venn diagram for mapping Vanuatu"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("phyloseq")
+```
+
+Check to see if there is a directory that can hold all the generated results. If not, make one
+```{r}
+dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+```
+
+load the fungal data
+```{r warning=False}
+# Set working directory 
+setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+# a transformed phyloseq object 
+vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
+# a raredied OTU dataset 
+#vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
+```
+
+```{r}
+
+```
+
