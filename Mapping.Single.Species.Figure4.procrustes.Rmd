@@ -11,6 +11,7 @@ Take care of some housekeeping
 # following this site
 rm(list=ls())
 dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+set.seed(1)
 ```
 Install some packages:
 ```{r}
@@ -22,6 +23,7 @@ library("dplyr")
 #library("automap")
 #library("mltools")
 ```
+
 The working directory is set within this RMD package, 
 But we're still going to need some data to work with
 For now this is stored on a local repository 
@@ -42,6 +44,8 @@ sbst <- subset_samples(vst_physeq, Sample_Type == c("Understory","Ground"))
     count_tab[count_tab <= 0.0] <- 0.0 # since this is a VST transeformed dataset, we'll need to set negative values to zero
 
     count_tab <- count_tab[rowSums(count_tab)>1,]
+   # count_tab <- decostand(count_tab, "hellinger")
+    
     
      otu_table(sbst) <- count_tab # and reinsert into the phylloseq object 
  sample_sums(sbst)[1:10] # double check to make sure tha worked 
