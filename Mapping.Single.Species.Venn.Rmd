@@ -7,26 +7,43 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-library("phyloseq")
-```
-
 Check to see if there is a directory that can hold all the generated results. If not, make one
 ```{r}
 dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
 ```
 
-load the fungal data
-```{r warning=False}
-# Set working directory 
-setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
-# a transformed phyloseq object 
-vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
-# a raredied OTU dataset 
-#vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
+Going to do this oldschool 
+
+Make a list of species in each habitat 
+```{r}
+BBB=2
+```
+
+
+```{r}
+# Load up the required CSV
+BBB=2
+gr.spec <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.grnd.",BBB,".occur.results.csv"), header = TRUE)
+un.spec <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.undr.",BBB,".occur.results.csv"), header = TRUE)
+ungr.gen <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/gen.grnd.undr.",BBB,".occur.results.csv"), header = TRUE)
+
 ```
 
 ```{r}
+Soil.Sp.Gn <- rbind(ungr.gen,gr.spec)
+Phyllo.sp.gn <- rbind(ungr.gen,un.spec)
 
+write.csv(Soil.Sp.Gn,"Generated.Results/Soil.Sp.Gen.combined.csv")
+write.csv(Phyllo.sp.gn,"Generated.Results/Phyllo.Sp.Gen.combined.csv")
 ```
+
+
+
+
+1. Find these files
+2. Open with excel
+3. copy list of OTU names 
+4. Paste in "Venny 2.1" 
+https://bioinfogp.cnb.csic.es/tools/venny/
+
 
