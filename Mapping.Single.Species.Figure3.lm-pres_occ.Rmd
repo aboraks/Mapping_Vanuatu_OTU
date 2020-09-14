@@ -103,6 +103,7 @@ full.table$Avg.Abund <- full.table$Abundance/full.table$Occupancy
 
 #Set colour palette
 ground.und.colours <- c( "#669900","#996600")
+spec.gen.colours <-  c("#404080", "#69b3a2")
 
 names(full.table)
 ```
@@ -133,6 +134,39 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abun
         scale = 1, width = 180, height = 100, units = "mm", 
         dpi = 300, limitsize = TRUE)
 ```
+
+
+
+Facet by specialization
+```{r}
+ggplot(data=full.table, aes(x=Occupancy, y=Avg.Abund, col=lifestyle))+
+  geom_point(alpha=0.3, size = 0.7)+
+  scale_colour_manual(values=spec.gen.colours)+
+  stat_smooth(method='loess')+
+  facet_grid(.~Habitat)+
+  #scale_color_viridis() +
+  #labs(title = "Interspecific Occupancy–abundance relationship") +
+  xlab(paste("Transect occupancy"))+ # \n (number of occurences / transect)")) +
+  ylab(paste("Local abundance"))+ # \n (OTU sequence reads/number of occurences)")) +
+    theme(panel.background = element_rect(fill = "white", colour = "black"),
+        strip.background = element_rect(fill = "white", colour = "black"),
+        #legend.key = element_blank(),
+        legend.justification = c(1.1, 0),# x-axis 
+        legend.position = c(1, 0.75),# y-axis
+        legend.title = element_blank(),
+        strip.text.x = element_text(size=12, face="bold"))
+```
+And save it 
+```{r}
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abundance.Spec.Gen.pdf"), device = NULL, path = NULL,
+        scale = 1, width = 180, height = 100, units = "mm", 
+        dpi = 300, limitsize = TRUE)
+```
+
+
+
+
+
 
 #Non-parametric tests
 Do not report means and standard deviations for non-parametric tests. Report the median
@@ -178,7 +212,7 @@ ggplot(data = full.table, aes(x=Occupancy, fill=lifestyle)) +
    scale_y_continuous(trans = "log10") +
    facet_wrap(~Habitat, scales = 'free_x') +
    xlab(paste("Transect occupancy"))+ # \n (number of occurences / transect)")) +
-   ylab(paste("Unique OTU count"))+ # \n (OTU sequence reads/number of occurences)")) +
+   ylab(paste("Observed species"))+ # \n (OTU sequence reads/number of occurences)")) +
    theme(panel.background = element_rect(fill = "white", colour = "black"),
         strip.background = element_rect(fill = "white", colour = "black"),
         #legend.key = element_blank(),
