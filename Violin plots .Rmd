@@ -14,9 +14,9 @@ stat_box_data <- function(y, upper_limit = max(un.gr.gen$Range) * 1.15) {
     data.frame(
       y = 0.97 * upper_limit,
       label = paste('count =', length(y), '\n',
-                    'mean =', round(mean(y), 2),'\n',
-                    'median =', round(median(y), 2), '\n')#,
-                    #'sd =', round(sd(y), 2), '\n',)
+                   # 'mean =', round(mean(y), 2),paste("m"),'\n',
+                    'median =', round(median(y), 2),paste("m"), '\n',
+                    'iqr =', round(IQR(y), 2), '\n')
     )
   )
 }
@@ -273,3 +273,72 @@ ggsave("./Generated.Results/OTU range size.pdf", plot = last_plot(), device = NU
        dpi = 300, limitsize = TRUE)
 
 ```
+
+
+
+
+
+Plot same habitat together, and compare specialization 
+```{r, echo=FALSE, warning=FALSE}
+# set the order you'd like
+un.gr.gen$group <- factor(un.gr.gen$group , levels=c("Understory Specialist", "Ground Specialist", "Understory Generalist", "Ground Generalist"))
+# annotation
+anno <- data.frame(x1 = 1.1, x2 = 1.9, y1 = 8, y2 = 8.5, xstar = 1.5, ystar = 8.7, lab = "***", SG = "Specialist")
+# change labels to more appropriate names 
+levels(un.gr.gen$Habitat)[match("Understory",levels(un.gr.gen$Habitat))] <- "Phyllosphere"
+levels(un.gr.gen$Habitat)[match("Ground",levels(un.gr.gen$Habitat))] <- "Soil"
+
+
+
+ggplot(un.gr.gen, aes(x = SG, y = Range, fill=SG)) +
+  geom_violin() +
+  stat_summary(fun.data = stat_box_data, # this is linked to the home-made function at the top 
+               geom = "text", # and places the locations of mean/median/n
+               hjust = 0.5,
+               vjust = 0.6) +
+  stat_summary(fun.y = mean, 
+               fun.ymin = mean, 
+               fun.ymax = mean, 
+               geom = "crossbar", 
+               width = 0.3)+
+  geom_jitter(shape=16, size=.3, position=position_jitter(0.3))+
+  scale_x_discrete(name = "") + 
+  scale_y_continuous(name = "OTU patch radius size (m)", limits = c(1,15)) +
+  scale_fill_manual(values=c("#404080", "#69b3a2"))+
+  facet_grid(.~Habitat)+
+#  geom_text(data = anno, aes(x = xstar,  y = ystar, label = lab,fill=NULL),family = "Times") +
+  theme(panel.background = element_rect(fill = "white", colour = "black"),
+        strip.background = element_rect(fill = "white", colour = "black"),
+        legend.key = element_blank(),
+        legend.position = "none",
+        legend.title = element_blank(),
+        strip.text.x = element_text(size=12, face="bold"))
+```
+Save the plot
+```{r}
+ggsave("./Generated.Results/OTU range size_Gen.Spec.pdf", plot = last_plot(), device = NULL, path = NULL,
+       scale = 1, width = 180, height = 100, units = "mm", 
+       dpi = 300, limitsize = TRUE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
