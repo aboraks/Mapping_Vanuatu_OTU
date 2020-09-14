@@ -7,6 +7,8 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#Venn of spatially autocorrelated OTU
+
 Check to see if there is a directory that can hold all the generated results. If not, make one
 ```{r}
 dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
@@ -46,4 +48,117 @@ write.csv(Phyllo.sp.gn,"Generated.Results/Phyllo.Sp.Gen.combined.csv")
 4. Paste in "Venny 2.1" 
 https://bioinfogp.cnb.csic.es/tools/venny/
 
+
+
+
+
+
+#Venn of all OTUs (not spatially autocorrelated dataset)
+
+Try this again 
+
+
+
+load some Functions
+```{r, echo=FALSE}
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
+
+getID <- function(phyloseq_Subset){
+  X1 <- otu_table(phyloseq_Subset)
+  
+  X1[X1 < 0.0] <- 0.0
+  X1 <- X1[ rowSums(X1)!=0,]
+  X1 <- X1[,order(colnames(X1))]
+  X1 <- t(X1)
+  
+  
+  X1 <- decostand(X1, "pa")
+  
+  
+  X1 <- X1[, order(colSums(-X1))]
+  tail(colSums(X1))
+  length(colSums(X1))
+  
+  
+  #select only the OTUs that occur at more than one location
+  otu_even <- X1[,colSums(X1) >= 16]
+  otu_even
+}
+
+#subset and remove Substrate identifyier from rowname 
+rmID <- function(phyloseq_Subset){
+  X1 <- otu_table(phyloseq_Subset)
+  
+  # some OTUs are now at a 0 value due to subsetting- remove any OTU less than 0
+  #  X1[X1 < 0.0] <- 0.0
+  #  X1 <- X1[ rowSums(X1)!=0,]
+  
+  
+  # order the two datasets 
+  X1 <- X1[,order(colnames(X1))]
+  X1 <- t(X1)
+  
+  # remove the character from rownames (so that datasets may be aligned)
+  rownames(X1) <- sub("*\\D", "", rownames(X1))
+  X1
+}
+
+```
+
+Load Packages
+```{r}
+library("phyloseq")
+```
+Check to see if there is a directory that can hold all the generated results. If not, make one
+```{r}
+dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+```
+load the fungal data
+```{r warning=False}
+# Set working directory 
+setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+# a transformed phyloseq object 
+vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
+# a raredied OTU dataset 
+#vst_physeq <- readRDS(file = "Rare_AVS_geog.rds")
+```
+
+```{r}
+
+sbst <- subset_samples(vst_physeq, Sample_Type == "Understory")
+Ufungi <- rmID(sbst)
+sbst <- subset_samples(vst_physeq, Sample_Type == "Ground")
+Gfungi <- rmID(sbst)
+
+# ensure only identical sample locations are represented 
+Gfungi <- Gfungi[(rownames(Gfungi) %in% rownames(Ufungi)),]
+Ufungi <- Ufungi[(rownames(Ufungi) %in% rownames(Gfungi)),]
+
+# check to make sure only identical sample locations are represented 
+# Remove the all() to see the not identical one(s)
+all(sapply(list(rownames(Ufungi)), FUN = identical, rownames(Gfungi))) # should be TRUE #
+
+
+# you now have two lists of matching Ground and Understory 
+# set abundances lower than 0 to 0
+Gfungi[Gfungi < 0.0] <- 0.0
+Ufungi[Ufungi < 0.0] <- 0.0
+
+Gfungi[1:4,1:4]
+Gfungi <- Gfungi[,colSums(Gfungi)>1] # [,colSums(un)!=0]
+ncol(Gfungi)
+
+Ufungi <- Ufungi[,colSums(Ufungi)>1] # [,colSums(un)!=0]
+ncol(Ufungi)
+```
+
+```{r}
+write.csv(Gfungi,"Generated.Results/Soil.Sp.Gen.combined.csv")
+write.csv(Ufungi,"Generated.Results/Phyllo.Sp.Gen.combined.csv")
+```
+1. Find these files
+2. Open with excel
+3. copy list of OTU names 
+4. Paste in "Venny 2.1" 
+https://bioinfogp.cnb.csic.es/tools/venny/
 
