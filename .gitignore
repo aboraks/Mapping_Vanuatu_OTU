@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-Generated.Results/**
+/Generated.Results/**
 Non-rmd files/
