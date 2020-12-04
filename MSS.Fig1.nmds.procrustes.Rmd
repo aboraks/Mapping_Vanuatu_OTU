@@ -29,12 +29,9 @@ But we're still going to need some data to work with
 For now this is stored on a local repository 
 In the future link this to a figshare DOI
 ```{r}
-#set WD
-setwd("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
-
 # load data
 # a transformed phyloseq object 
-vst_physeq <- readRDS(file = "vst_physeq_geog.rds")
+vst_physeq <- readRDS(file = "~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/vst_physeq_geog.rds")
 ```
 
 Remove OTUs that do not show appear more than 0 times in more than half the samples
