@@ -72,7 +72,7 @@ ground.und.colours <- c("#996600","#669900")
 
 
 
-p2 = plot_ordination(sbst, GP.ord,color="Sample_Type")#, shape = "Transect")
+p2 = plot_ordination(sbst, GP.ord,color="Sample_Type", shape = "Sample_Type")
 p2 + 
   #geom_polygon(aes(fill=Sample_Type)) + 
   geom_point() + 
