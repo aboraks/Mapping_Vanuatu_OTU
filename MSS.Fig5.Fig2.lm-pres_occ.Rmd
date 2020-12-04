@@ -34,9 +34,9 @@ BBB=2
 
 # Load up the required CSV
 BBB=2
-gr.spec <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.grnd.",BBB,".occur.results.csv"), header = TRUE)
-un.spec <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.undr.",BBB,".occur.results.csv"), header = TRUE)
-ungr.gen <- read.csv(file = paste("/Users/fungi/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/gen.grnd.undr.",BBB,".occur.results.csv"), header = TRUE)
+gr.spec <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.grnd.",BBB,".occur.results.csv"), header = TRUE)
+un.spec <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/special.undr.",BBB,".occur.results.csv"), header = TRUE)
+ungr.gen <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Patch.occupancy/gen.grnd.undr.",BBB,".occur.results.csv"), header = TRUE)
 
 par(mfrow=c(2,2))
 scatter.smooth(x=gr.spec$Ground.PA, y=gr.spec$Ground.abund/gr.spec$Ground.PA, 
@@ -107,7 +107,7 @@ spec.gen.colours <-  c("#404080", "#69b3a2")
 
 names(full.table)
 ```
-
+Facet by specialization
 ```{r}
 ggplot(data=full.table, aes(x=Occupancy, y=Avg.Abund, col=Habitat))+
   geom_point(alpha = 4/10, size = 0.7)+
@@ -137,7 +137,7 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abun
 
 
 
-Facet by specialization
+Facet by habitat
 ```{r}
 ggplot(data=full.table, aes(x=Occupancy, y=Avg.Abund, col=lifestyle))+
   geom_point(alpha=0.3, size = 0.7)+
@@ -154,11 +154,11 @@ ggplot(data=full.table, aes(x=Occupancy, y=Avg.Abund, col=lifestyle))+
         legend.justification = c(1.1, 0),# x-axis 
         legend.position = c(1, 0.75),# y-axis
         legend.title = element_blank(),
-        strip.text.x = element_text(size=12, face="bold"))
+        strip.text.x = element_text(size=15, face="bold"))
 ```
 And save it 
 ```{r}
-ggsave( plot = last_plot(), filename = paste("./Generated.Results/Occupancy_abundance.Spec.Gen.pdf"), device = NULL, path = NULL,
+ggsave( plot = last_plot(), filename = paste("./Generated.Results/Fig5.OA.pdf"), device = NULL, path = NULL,
         scale = 1, width = 180, height = 100, units = "mm", 
         dpi = 300, limitsize = TRUE)
 ```
