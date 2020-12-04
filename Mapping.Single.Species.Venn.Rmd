@@ -144,12 +144,18 @@ all(sapply(list(rownames(Ufungi)), FUN = identical, rownames(Gfungi))) # should 
 Gfungi[Gfungi < 0.0] <- 0.0
 Ufungi[Ufungi < 0.0] <- 0.0
 
+#turn Dataset into PA dataset
+Gfungi[Gfungi > 0.0] <- 1
+Ufungi[Ufungi > 0.0] <- 1
+
 Gfungi[1:4,1:4]
-Gfungi <- Gfungi[,colSums(Gfungi)>1] # [,colSums(un)!=0]
+Gfungi <- Gfungi[,colSums(Gfungi)>1] # [,colSums(un)!=0] #remove singletons 
 ncol(Gfungi)
+Gfungi <- t(Gfungi)
 
 Ufungi <- Ufungi[,colSums(Ufungi)>1] # [,colSums(un)!=0]
 ncol(Ufungi)
+Ufungi <- t(Ufungi)
 ```
 
 ```{r}

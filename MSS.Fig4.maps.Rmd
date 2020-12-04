@@ -1,20 +1,40 @@
-Mapping.OTU.Figure.maps
-================
-andre
-2020-06-05
+---
+title: "Mapping.OTU.Figure.maps"
+author: "andre"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
 
-Load up the required packages
-
-load up the fungal data csv file and set working directory
-
-``` r
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Load up the required packages 
+```{r include=FALSE}
+library(dplyr)
+library(phyloseq)
+library(sp)
+library(automap)
+library(viridis)
+#library("reshape2")
+#library("vegan")
+library("ggplot2")
+#require(tibble)
+#library(reshape2)
+```
+load up the fungal data csv file 
+```{r}
 # setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
 vst_physeq <- readRDS(file = "~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/vst_physeq_geog.rds") ## a phyloseq object containing a transformed otu table 
 ```
 
-We’re going to need a lattice to overlay our plotting variables.
+Check to see if there is a directory that can hold all the generated results. If not, make one
+```{r}
+dir.create(file.path("./", "Generated.Results"), showWarnings = FALSE)
+```
 
-``` r
+
+We're going to need a lattice to overlay our plotting variables.
+```{r}
 start_lat <- 0
 start_lng <- 0
 griddf <- expand.grid(latcoords = seq(from = start_lat, by = 0.5, l = 21),
@@ -32,18 +52,13 @@ coordinates(griddf) <- ~ latcoords + lngcoords
 # Change the grid points into a lattice 
 gridded(griddf) <- TRUE
 ```
-
-Parameter: this will set the minimum number of occurrences for an OTU
-must be seen within a transect to be considered ‘real’
-
-``` r
+Parameter: 
+this will set the minimum number of occurrences for an OTU must be seen within a transect to be considered 'real'
+```{r}
 BBB=2 #min occur
 ```
-
-This loop will generate maps and save them to a subdirectory named:
-Generated.Results
-
-``` r
+This loop will generate maps and save them to a subdirectory named: Generated.Results
+```{r `echo = FALSE`, warning=FALSE, , message=FALSE}
 take.a.look <- read.csv(file = paste("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R/Mapping.single.sp/Mantel.0.05/Maps/",BBB,"otu.range.habitat.generalist.csv"), header = TRUE)
 take.a.look <- take.a.look[complete.cases(take.a.look), ] # remove the NA's
 take.a.look <- take.a.look[take.a.look$Range>1,] # remove garbage variograms (you can also take a look at the maps in the corresponding directory)
@@ -149,37 +164,11 @@ ggsave( plot = map, filename = paste("./Generated.Results/",new_dupes[AAA,1],"Tr
 map
 
 }
+
+
+
+
+
 ```
 
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
 
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]
-
-    ## [using ordinary kriging]
-    ## [using ordinary kriging]

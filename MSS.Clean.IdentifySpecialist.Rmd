@@ -85,7 +85,7 @@ make.heat.map <- function(gutable,ID){
 # Workflow
 1 Identify OTUs that are found in ground/understory/both 
 subset entire dataset to only reflect sample-types that are matcing in location
-(note) this list is only for catiloging what the substrate the OTU is found in (not in development of variogram)
+(note) this list is only for cataloging what the substrate the OTU is found in (not in development of variogram)
 2 pare dataset down to only samples that can be used for experimental variogram 
     2.a - ie -found in a minimum number of samples/transect + a minimum number of transects
 3 Make variograms for each OTU+transect - combine individual OTU from multiple transects to form a composite variogram 
@@ -285,7 +285,7 @@ groundfungi
 underfungi
 
 
-No out of currosity we are going to see how many of these OTUs occur in more than one transect
+Now out of currosity we are going to see how many of these OTUs occur in more than one transect
 In otherwords are there OTUs that are identified as a specialist in more than one transect? and if so, how many of them are there?
 ```{r}
 # how many ground fungi are found in high abundance in more than one transect 
@@ -437,7 +437,7 @@ nrow(subset(results.grnd, MantelP<0.05))/nrow(results.grnd) # %
 # for a results summary - check out "./Mapping.single.sp/occurrences per transect and spatial autocorrelation.xlsx"
 ```
 We now have a table of Soil specialist OTUs 
-and their likelyhood of being spatially autocorrelated
+and their likelihood of being spatially autocorrelated
 ```{r}
 print(paste(nrow(subset(results.grnd, MantelP<0.05)),"Ground OTUs are spatially autocorrelated with a Mantel threshold of p<0.05"))
 print(paste("or",nrow(subset(results.grnd, MantelP<0.05))/nrow(results.grnd),"% are spatially autocorrelated"))
