@@ -4,3 +4,4 @@
 .Ruserdata
 /Generated.Results/**
 Non-rmd files/
+.DS_Store
