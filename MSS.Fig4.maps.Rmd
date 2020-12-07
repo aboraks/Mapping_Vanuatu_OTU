@@ -18,6 +18,7 @@ library(viridis)
 #library("reshape2")
 #library("vegan")
 library("ggplot2")
+library(cowplot)
 #require(tibble)
 #library(reshape2)
 ```
@@ -172,4 +173,7 @@ ggsave( plot = map, filename = paste("./Generated.Results/",new_dupes[AAA,1],"Tr
 ```
 You now have maps[AAA]
 Find a way to facet wrap or make a composite. 
+```{r}
+plot_grid(map1, map2, labels = c('A', 'B'))
+```
 
