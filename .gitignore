@@ -7,4 +7,4 @@ Non-rmd files/
 .DS_Store
 *.jpg
 .pdf
-Generated.Results/
+Generated.Results/*.jpg
