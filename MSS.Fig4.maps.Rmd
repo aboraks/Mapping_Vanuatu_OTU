@@ -137,7 +137,7 @@ kr.U <- autoKrige(tp.Ugeo$OTU_count~1, tp.Ugeo, griddf, model = "Exp", fix.value
 
 ggplot_data.U <- as.data.frame(kr.U$krige_output)
 ggplot_data.U$var1.pred<- cut_interval(ggplot_data.U$var1.pred, n=8,labels = FALSE) # chop the data into ordinal data - otherwise maps are hard to read 
-ggplot_data.U$Habitat <- "Phyllosphere"
+ggplot_data.U$Habitat <- "Leaf"
 
 
 ####################################################################
@@ -164,16 +164,78 @@ ggsave( plot = map, filename = paste("./Generated.Results/",new_dupes[AAA,1],"Tr
        dpi = 200, limitsize = TRUE)
 
 
+
+
+#the compo maps are for a composite image produced in cowplot
+compo <- ggplot(plot_me, aes(y = latcoords, x = lngcoords, fill = var1.pred)) + 
+  geom_raster() + 
+  coord_fixed() + 
+  scale_fill_viridis(option = "magma") +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  facet_wrap(~Habitat, ncol = 1, strip.position="right")+
+  theme(legend.position = "none", 
+        axis.title=element_blank(), 
+        axis.text=element_blank(), 
+        axis.ticks=element_blank())
+
+assign(paste("compo",AAA, sep = ""),compo)  
+
 }
-
-
-
-
-
 ```
 You now have maps[AAA]
 Find a way to facet wrap or make a composite. 
 ```{r}
-plot_grid(map1, map2, labels = c('A', 'B'))
+plist <- list(compo1, NULL, compo2, compo3, NULL, compo4, compo5, NULL, compo6, compo7, NULL, compo8,
+          compo9, NULL, compo10)
+
+v1 <- plot_grid(plotlist=plist,
+          #labels = "AUTO",
+          #labels = c("A", "B", "C", 'D', 'E', 'F', 'G', 'H', 'I', 'J'),
+          label_fontfamily = "serif",
+          label_fontface = "plain",
+          rel_widths = c(1, -0.6, 1), # This is used to squeeze the plots together. https://stackoverflow.com/questions/41834093/decrease-margins-between-plots-when-using-cowplot
+          ncol = 3,
+          scale =1.1,
+          label_colour = "blue")
+```
+save this plot
+```{r}
+save_plot(plot = v1, filename = paste("./Generated.Results/comp1.jpg"),
+          base_height = 3.71,
+          base_asp = 1.618,
+          base_width = NULL)
+```
+
+
+```{r}
+p1 <- plot_grid(compo1)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p2 <- plot_grid(compo2)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p3 <- plot_grid(compo3)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p4 <- plot_grid(compo4)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p5 <- plot_grid(compo5)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p6 <- plot_grid(compo6)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p7 <- plot_grid(compo7)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p8 <- plot_grid(compo8)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p9 <- plot_grid(compo9)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p10 <- plot_grid(compo10)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p11 <- plot_grid(compo11)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
+
+
+
+v2 <- plot_grid(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,
+          #labels = "AUTO",
+          labels = c("a.", "b.", "c.", 'd.', 'e.', 'f.', 'g.', 'h.', 'i.', 'j.','k.'),
+          #label_fontfamily = "serif",
+          label_fontface = "plain",
+          ncol = 3)
+```
+save it
+```{r}
+save_plot(plot = v2, filename = paste("./Generated.Results/comp2.jpg"),
+          base_height = 3.71,
+          base_asp = 1.618,
+          base_width = NULL)
 ```
 
