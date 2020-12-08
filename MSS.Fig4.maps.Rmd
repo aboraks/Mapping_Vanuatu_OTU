@@ -233,7 +233,7 @@ v2 <- plot_grid(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,
 ```
 save it
 ```{r}
-save_plot(plot = v2, filename = paste("./Generated.Results/comp2.jpg"),
+save_plot(plot = v2, filename = paste("./Generated.Results/comp2.pdf"),
           base_height = 3.71,
           base_asp = 1.618,
           base_width = NULL)
