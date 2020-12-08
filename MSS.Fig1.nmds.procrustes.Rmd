@@ -20,7 +20,7 @@ library("vegan")
 library("ggplot2")
 #library("tidyr")
 library("dplyr")
-#library("automap")
+library("ggforce") #for venn diagram
 #library("mltools")
 ```
 
@@ -109,4 +109,32 @@ ggsave( plot = last_plot(), filename = paste("./Generated.Results/NMDS_SoilPhyll
         scale = 1, width = 88, height = 88, units = "mm", 
         dpi = 300, limitsize = TRUE)
 ```
+
+
+
+
+Venn Diagram 
+```{r}
+
+
+
+
+df.venn <- data.frame(x = c(0, 0),
+                      y = c(1.7, 0),
+                      tx = c(0, 0),
+                      ty = c(2, -1),
+                      cat = c('A \n 12321', 'B'))
+
+ggplot(df.venn, aes(x0 = x, y0 = y, r = 1.5, fill = cat)) +
+    geom_circle(alpha = .3, size = 1, colour = 'grey', show.legend = FALSE) +
+        #geom_text(aes(x =tx, y = ty, label = cat), size=7)+
+        coord_fixed() +
+        scale_fill_manual(values = c("#669900","#996600")) +
+        labs(fill = NULL) +
+        annotate(geom = "text", x =0, y = 2.2, label = "Phyllosphere specialists \n 2212", size = 5)+
+        annotate(geom = "text", x =0, y = 0.8, label = "Generalists \n 1307", size = 5)+
+        annotate(geom = "text", x =0, y = -0.8, label = "Soil specialists \n 2187", size = 5)+
+          theme_void()
+```
+
 
