@@ -183,8 +183,7 @@ assign(paste("compo",AAA, sep = ""),compo)
 
 }
 ```
-You now have maps[AAA]
-Find a way to facet wrap or make a composite. 
+Combine all maps 
 ```{r}
 plist <- list(compo1, NULL, compo2, compo3, NULL, compo4, compo5, NULL, compo6, compo7, NULL, compo8,
           compo9, NULL, compo10)
@@ -229,7 +228,7 @@ v2 <- plot_grid(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,
           labels = c("a.", "b.", "c.", 'd.', 'e.', 'f.', 'g.', 'h.', 'i.', 'j.','k.'),
           #label_fontfamily = "serif",
           label_fontface = "plain",
-          ncol = 3)
+          ncol = 4)
 ```
 save it
 ```{r}
@@ -239,3 +238,41 @@ save_plot(plot = v2, filename = paste("./Generated.Results/comp2.pdf"),
           base_width = NULL)
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+test
+
+
+
+```{r}
+p1 <- plot_grid(compo1)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p2 <- plot_grid(compo2)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p3 <- plot_grid(compo3)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p4 <- plot_grid(compo4)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p5 <- plot_grid(compo5)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p6 <- plot_grid(compo6)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p7 <- plot_grid(compo7)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p8 <- plot_grid(compo8)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p9 <- plot_grid(compo9)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p10 <- plot_grid(compo10)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p11 <- plot_grid(compo11)+theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
+
+
+
+plot_grid(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,
+          #labels = "AUTO",
+          labels = c("a.", "b.", "c.", 'd.', 'e.', 'f.', 'g.', 'h.', 'i.', 'j.','k.'),
+          #label_fontfamily = "serif",
+          label_fontface = "plain",
+          ncol = 4)
+```
