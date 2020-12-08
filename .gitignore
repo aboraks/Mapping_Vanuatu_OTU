@@ -8,3 +8,4 @@ Non-rmd files/
 *.jpg
 .pdf
 Generated.Results/*.jpg
+Generated.Results
