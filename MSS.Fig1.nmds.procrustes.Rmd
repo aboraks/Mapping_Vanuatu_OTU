@@ -73,7 +73,7 @@ ground.und.colours <- c("#996600","#669900")
 
 
 p2 = plot_ordination(sbst, GP.ord,color="Sample_Type", shape = "Sample_Type")
-p2 + 
+nmds <- p2 + 
   #geom_polygon(aes(fill=Sample_Type)) + 
   geom_point() + 
   scale_colour_manual(values=ground.und.colours)+
@@ -125,16 +125,28 @@ df.venn <- data.frame(x = c(0, 0),
                       ty = c(2, -1),
                       cat = c('A \n 12321', 'B'))
 
-ggplot(df.venn, aes(x0 = x, y0 = y, r = 1.5, fill = cat)) +
+venn <- ggplot(df.venn, aes(x0 = x, y0 = y, r = 1.7, fill = cat)) +
     geom_circle(alpha = .3, size = 1, colour = 'grey', show.legend = FALSE) +
         #geom_text(aes(x =tx, y = ty, label = cat), size=7)+
         coord_fixed() +
         scale_fill_manual(values = c("#669900","#996600")) +
         labs(fill = NULL) +
-        annotate(geom = "text", x =0, y = 2.2, label = "Phyllosphere specialists \n 2212", size = 5)+
-        annotate(geom = "text", x =0, y = 0.8, label = "Generalists \n 1307", size = 5)+
-        annotate(geom = "text", x =0, y = -0.8, label = "Soil specialists \n 2187", size = 5)+
+        annotate(geom = "text", x =0, y = 2.3, label = "Phyllosphere specialists \n 2212", size = 4)+
+        annotate(geom = "text", x =0, y = 0.8, label = "Generalists \n 1307", size = 4)+
+        annotate(geom = "text", x =0, y = -0.8, label = "Soil specialists \n 2187", size = 4)+
           theme_void()
 ```
 
+combine nmds and venn
+```{r}
+combo <- plot_grid(nmds,venn,
+                   labels = c("a.", "b."))
+```
+and save
+```{r}
+save_plot(plot = combo, filename = paste("./Generated.Results/Fig1.nmds.pdf"),
+          base_height = 3.71,
+          base_asp = 1.618,
+          base_width = NULL)
+```
 
