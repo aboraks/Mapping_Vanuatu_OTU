@@ -1,0 +1,141 @@
+---
+title: "Map of Vanuatu"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+rm(list = ls())
+
+
+# The below code is based off this website:
+
+#https://www.r-spatial.org/r/2018/10/25/ggplot2-sf-2.html
+
+
+library("ggplot2")
+library("sf")                 
+library("rnaturalearth")
+library("rnaturalearthdata")
+library("ggspatial")
+library("ggrepel")
+setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
+#Load Packages 
+theme_set(theme_bw())
+
+# get transect locations 
+# add transect column Longitude
+transect <- c(1,4,6,9,10,12)
+
+
+
+Lon <- c(169.2952778, 169.3498055,169.4530833,169.8546945,169.7964445,169.8481388)
+# add transect column Latitude
+Lat <- c(-19.3919167,-19.5971112,-19.5727222,-20.2378055,-20.2181945,-20.2043055)
+
+Tran_coord <- cbind(Lon, Lat)#################
+row.names(Tran_coord) <- transect
+
+Tran_coord <- cbind(Lon, Lat,transect) #############
+Tran_coord <- as.data.frame(Tran_coord)
+
+
+# adding field sited to maps
+
+
+# make a dataframe with island names 
+island <- c("Tanna", "Aneityum")
+islLat <- c(-19.5, -20.19)
+islLon <- c(169.34, 169.81)
+isl <- cbind(islLon,islLat)
+row.names(isl) <- island
+isl <- as.data.frame(isl)
+
+
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+class(world)
+
+(coral_sea <- ggplot(data = world) +
+  geom_sf() +
+  annotate(geom = "text", x = 145, y = -31, label = "Australia", 
+           color = "grey22", size = 6.7,family = "Helvetica") +
+  annotate(geom = "text", x = 165, y = -23, label = "Vanuatu", 
+           color = "grey22", size = 8.7, fontface = "bold",family = "Helvetica") +
+  geom_rect(xmin = 168, xmax = 171, ymin = -18.5, ymax = -21, 
+            fill = NA, colour = "black", size = 1.5) +
+  coord_sf(xlim = c(135, 180), ylim = c(-35, 10), expand = FALSE, datum = NA)+
+  theme(plot.background =
+          element_rect(fill = "white", linetype = 1,
+                       size = 0.3, colour = "black"),
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none"))
+# Error #
+# if your're getting errors "...polygon edge not found" 
+# Just re-run the code block theme(text = element_text(family = "Times"))   ## This is the line to change font / fonts to Times New Roman 
+
+
+Vanuatu <- ne_countries(scale = "large",country = "vanuatu", returnclass = "sf")
+# if error - install with this code:
+# devtools::install_github("ropensci/rnaturalearthhires")
+
+
+(Tran_coord <- st_as_sf(Tran_coord, coords = c("Lon", "Lat"), 
+                   crs = 4326, agr = "constant"))
+(isl <- st_as_sf(isl, coords = c("islLon", "islLat"), remove = FALSE, 
+                      crs = 4326, agr = "constant"))
+
+
+(sample_sites <- ggplot(data = Vanuatu) +
+  geom_sf(fill = "cornsilk") +
+  annotation_scale(location = "br", width_hint = 0.4) + # scale bar
+  annotation_north_arrow(location = "tr", which_north = "true", pad_x = unit(0.5, "in"), pad_y = unit(0.5, "in"), 
+                         height = unit(3, "cm"), width = unit(3, "cm"), style = north_arrow_fancy_orienteering) + # North arrow
+  geom_sf(data = Tran_coord, size = 5, shape = 23, fill = "darkred") + # Should you want Transect ID - replace this line with:  geom_sf_text(data = Tran_coord, aes(label = transect)) +
+  geom_text_repel(data = isl, aes(x = islLon, y = islLat, label = rownames(isl)), 
+            size = 10,family = "Helvetica", col = "black", fontface = "bold", nudge_x = c(0.2, -0.2), nudge_y = c(0.1, -0.1)) +
+  xlab("Longitude")+ ylab("Latitude")+
+  scale_x_continuous(breaks = c(169.2,169.6,170))+  
+  coord_sf(xlim = c(169, 170.1), ylim = c(-20.4,-19.2), expand = FALSE)+ #islands
+  theme(panel.grid.major = element_line(colour = gray(0.5), linetype = "dashed", 
+                                        size = 0.5), panel.background = element_rect(fill = "aliceblue"), 
+        panel.border = element_rect(fill = NA),text = element_text(family = "Helvetica", size=25)))
+# Error #
+# if your're getting errors "...polygon edge not found" 
+# Just re-run the code block theme(text = element_text(family = "Times"))   ## This is the line to change font / fonts to Times New Roman 
+
+
+
+library(cowplot)
+
+ratioCoralSea <- (10 - (-35 )) / (180 - 135)
+ggdraw(sample_sites) +
+  draw_plot(coral_sea, width = 0.29, height = 0.3 * 10/6 * ratioCoralSea, x = 0.21, y = 0.035)
+# Error #
+# if your're getting errors "...polygon edge not found" 
+# Just re-run the code block
+
+
+#ggsave("Vanuatu_transect_Locations_big.tiff", width = 10, height = 10)
+ggsave("Vanuatu_transect_Locations_big.tiff", plot = last_plot(), device = NULL, path = NULL,
+       scale = 1, width = 174*1.5, height =120*1.5, units = "mm", 
+       dpi = 800, limitsize = TRUE)
+
+
+
+
+
+
+
+
+```
+
