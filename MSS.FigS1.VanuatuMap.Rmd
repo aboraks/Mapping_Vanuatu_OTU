@@ -25,6 +25,11 @@ library("ggspatial")
 library("ggrepel")
 setwd("~/Google Drive/Projects/Vanuatu/Vanuatu Molecular/New_Analysis/R")
 #Load Packages 
+
+```
+Make a dataframe with the locations of the transects
+```{r}
+
 theme_set(theme_bw())
 
 # get transect locations 
@@ -43,32 +48,32 @@ row.names(Tran_coord) <- transect
 Tran_coord <- cbind(Lon, Lat,transect) #############
 Tran_coord <- as.data.frame(Tran_coord)
 
-
-# adding field sited to maps
-
-
-# make a dataframe with island names 
+```
+Make a dataframe with island names 
+```{r}
 island <- c("Tanna", "Aneityum")
 islLat <- c(-19.5, -20.19)
 islLon <- c(169.34, 169.81)
 isl <- cbind(islLon,islLat)
 row.names(isl) <- island
 isl <- as.data.frame(isl)
+```
 
-
+Make a map of the coral sea and identify vanuatu 
+```{r}
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
 class(world)
 
 (coral_sea <- ggplot(data = world) +
   geom_sf() +
-  annotate(geom = "text", x = 145, y = -31, label = "Australia", 
-           color = "grey22", size = 6.7,family = "Helvetica") +
-  annotate(geom = "text", x = 165, y = -23, label = "Vanuatu", 
+  annotate(geom = "text", x = 135, y = -25, label = "Australia", 
+           color = "grey22", size = 6.0,family = "Helvetica") +
+  annotate(geom = "text", x = 170, y = -23, label = "Vanuatu", 
            color = "grey22", size = 8.7, fontface = "bold",family = "Helvetica") +
   geom_rect(xmin = 168, xmax = 171, ymin = -18.5, ymax = -21, 
             fill = NA, colour = "black", size = 1.5) +
-  coord_sf(xlim = c(135, 180), ylim = c(-35, 10), expand = FALSE, datum = NA)+
+  coord_sf(xlim = c(125, 190), ylim = c(-50, 10), expand = FALSE, datum = NA)+
   theme(plot.background =
           element_rect(fill = "white", linetype = 1,
                        size = 0.3, colour = "black"),
@@ -82,7 +87,10 @@ class(world)
 # Error #
 # if your're getting errors "...polygon edge not found" 
 # Just re-run the code block theme(text = element_text(family = "Times"))   ## This is the line to change font / fonts to Times New Roman 
+```
 
+
+```{r}
 
 Vanuatu <- ne_countries(scale = "large",country = "vanuatu", returnclass = "sf")
 # if error - install with this code:
@@ -98,8 +106,8 @@ Vanuatu <- ne_countries(scale = "large",country = "vanuatu", returnclass = "sf")
 (sample_sites <- ggplot(data = Vanuatu) +
   geom_sf(fill = "cornsilk") +
   annotation_scale(location = "br", width_hint = 0.4) + # scale bar
-  annotation_north_arrow(location = "tr", which_north = "true", pad_x = unit(0.5, "in"), pad_y = unit(0.5, "in"), 
-                         height = unit(3, "cm"), width = unit(3, "cm"), style = north_arrow_fancy_orienteering) + # North arrow
+  annotation_north_arrow(location = "tr", which_north = "true", pad_x = unit(0.1, "in"), pad_y = unit(0.6, "in"), 
+                         height = unit(3, "cm"), width = unit(3, "cm"), style = north_arrow_nautical) + # North arrow
   geom_sf(data = Tran_coord, size = 5, shape = 23, fill = "darkred") + # Should you want Transect ID - replace this line with:  geom_sf_text(data = Tran_coord, aes(label = transect)) +
   geom_text_repel(data = isl, aes(x = islLon, y = islLat, label = rownames(isl)), 
             size = 10,family = "Helvetica", col = "black", fontface = "bold", nudge_x = c(0.2, -0.2), nudge_y = c(0.1, -0.1)) +
@@ -112,30 +120,31 @@ Vanuatu <- ne_countries(scale = "large",country = "vanuatu", returnclass = "sf")
 # Error #
 # if your're getting errors "...polygon edge not found" 
 # Just re-run the code block theme(text = element_text(family = "Times"))   ## This is the line to change font / fonts to Times New Roman 
+```
 
 
+
+Glue the two maps together 
+```{r}
 
 library(cowplot)
 
 ratioCoralSea <- (10 - (-35 )) / (180 - 135)
 ggdraw(sample_sites) +
-  draw_plot(coral_sea, width = 0.29, height = 0.3 * 10/6 * ratioCoralSea, x = 0.21, y = 0.035)
+  draw_plot(coral_sea, width = 0.29, height = 0.3 * 10/6 * ratioCoralSea, x = 0.21, y = 0.028)
 # Error #
 # if your're getting errors "...polygon edge not found" 
 # Just re-run the code block
 
+```
+
+Save it 
+```{r}
 
 #ggsave("Vanuatu_transect_Locations_big.tiff", width = 10, height = 10)
-ggsave("Vanuatu_transect_Locations_big.tiff", plot = last_plot(), device = NULL, path = NULL,
+ggsave(filename = paste("./Generated.Results/Vanuatu_map.tiff"), plot = last_plot(), device = NULL, path = NULL,
        scale = 1, width = 174*1.5, height =120*1.5, units = "mm", 
        dpi = 800, limitsize = TRUE)
-
-
-
-
-
-
-
 
 ```
 
