@@ -449,6 +449,7 @@ and
 -the number of transects an OTU appears in
 affects
 -the proportion of spatially autocorrelated OTUs
+-In other words, is an OTU more likely to be spatially autocorrelated in more than one transect.  
 
 ```{r}
 
